@@ -42,18 +42,18 @@ class DnaScene {
     const angleStep = (turns * Math.PI * 2) / steps;
 
     // Shared glowing glass sphere geometry & material for strands
-    const sphereGeo = new THREE.SphereGeometry(0.085, 16, 16);
+    const sphereGeo = new THREE.SphereGeometry(0.095, 16, 16);
     const strandMat1 = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
       emissive: 0x38bdf8,
-      emissiveIntensity: 0.6,
+      emissiveIntensity: 0.8,
       roughness: 0.15,
       metalness: 0.3
     });
     const strandMat2 = new THREE.MeshStandardMaterial({
       color: 0x00a896,
       emissive: 0x00a896,
-      emissiveIntensity: 0.6,
+      emissiveIntensity: 0.8,
       roughness: 0.15,
       metalness: 0.3
     });
@@ -121,20 +121,20 @@ class DnaScene {
 
     // Continuous fiber-optic glowing spline tubes along both strands
     const curve1 = new THREE.CatmullRomCurve3(pointsStrand1);
-    const tubeGeo1 = new THREE.TubeGeometry(curve1, 120, 0.028, 8, false);
+    const tubeGeo1 = new THREE.TubeGeometry(curve1, 120, 0.042, 8, false);
     const tubeMat1 = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
       transparent: true,
-      opacity: 0.75
+      opacity: 0.85
     });
     this.group.add(new THREE.Mesh(tubeGeo1, tubeMat1));
 
     const curve2 = new THREE.CatmullRomCurve3(pointsStrand2);
-    const tubeGeo2 = new THREE.TubeGeometry(curve2, 120, 0.028, 8, false);
+    const tubeGeo2 = new THREE.TubeGeometry(curve2, 120, 0.042, 8, false);
     const tubeMat2 = new THREE.MeshBasicMaterial({
       color: 0x00a896,
       transparent: true,
-      opacity: 0.75
+      opacity: 0.85
     });
     this.group.add(new THREE.Mesh(tubeGeo2, tubeMat2));
   }
@@ -172,17 +172,15 @@ class DnaScene {
       // 2. Outer Luxury Translucent Glass Sphere
       const glassGeo = new THREE.SphereGeometry(0.56, 32, 32);
       const glassMat = new THREE.MeshPhysicalMaterial({
-        color: 0xf0fdfa,
+        color: cfg.color,
         emissive: cfg.color,
-        emissiveIntensity: 0.25,
-        metalness: 0.1,
-        roughness: 0.08,
-        transmission: 0.85,
-        opacity: 0.9,
+        emissiveIntensity: 0.35,
+        metalness: 0.15,
+        roughness: 0.1,
         transparent: true,
+        opacity: 0.5,
         clearcoat: 1.0,
-        clearcoatRoughness: 0.08,
-        ior: 1.52
+        clearcoatRoughness: 0.1
       });
       const glassMesh = new THREE.Mesh(glassGeo, glassMat);
       nodeGroup.add(glassMesh);

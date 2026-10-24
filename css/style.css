@@ -34,6 +34,22 @@ h1, h2, h3, h4, h5, .font-heading {
   font-family: 'Outfit', sans-serif;
 }
 
+/* WebGL 3D Canvas Container */
+#webgl-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+}
+
+#webgl-container canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Background Atmosphere */
 .scene-vignette {
   position: fixed;

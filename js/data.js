@@ -241,7 +241,7 @@ const NODES_DATA = [
           <div class="relative h-64 sm:h-72 w-full select-none overflow-hidden bg-slate-950" id="sensory-visualizer">
             <!-- Background Layer (AFTER: Sensory Design by Goodlife) -->
             <div id="sensory-layer-after" class="absolute inset-0 w-full h-full overflow-hidden">
-              <img id="img-sensory-after" src="assets/clinic-after.jpg?v=2.6" alt="Phòng chờ sau thiết kế Sensory Design" class="w-full h-full object-cover">
+              <img id="img-sensory-after" src="assets/clinic-after.jpg" alt="Phòng chờ sau thiết kế Sensory Design" class="w-full h-full object-cover">
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/30 pointer-events-none"></div>
               
               <!-- Fixed Top-Right Badge for AFTER -->
@@ -255,7 +255,7 @@ const NODES_DATA = [
 
             <!-- Foreground Layer (BEFORE: Outdated Clinic, clipped by polygon) -->
             <div id="sensory-layer-before" class="absolute inset-0 w-full h-full overflow-hidden z-10" style="clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);">
-              <img id="img-sensory-before" src="assets/clinic-before.jpg?v=2.6" alt="Phòng chờ cũ trước cải tạo" class="w-full h-full object-cover">
+              <img id="img-sensory-before" src="assets/clinic-before.jpg" alt="Phòng chờ cũ trước cải tạo" class="w-full h-full object-cover">
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/30 pointer-events-none"></div>
               
               <!-- Fixed Top-Left Badge for BEFORE -->

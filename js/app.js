@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const labelElements = [];
   const lineElements = [];
+  let activeNodeIdx = null;
 
   // 1. Initialize Master 3D Scene
   const buildingScene = new BuildingScene('webgl-container');
@@ -216,18 +217,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const isSidePanelOpen = sidePanel.classList.contains('open');
     const anchors = buildingScene.labelAnchors;
 
+    if (!anchors || anchors.length === 0) return;
+
     NODES_DATA.forEach((data, idx) => {
       const anchor = anchors[idx];
       const labelEl = labelElements[idx];
       const lineEl = lineElements[idx];
 
-      if (!anchor || !labelEl) return;
+      if (!anchor || !labelEl || !lineEl) return;
 
       anchor.getWorldPosition(tempVec);
       tempVec.project(buildingScene.camera);
 
-      // Check if behind camera
-      if (tempVec.z > 1) {
+      // Check if behind camera or invalid projection coordinates
+      if (tempVec.z > 1 || isNaN(tempVec.x) || isNaN(tempVec.y)) {
         labelEl.style.opacity = '0';
         lineEl.style.opacity = '0';
         return;
@@ -780,17 +783,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const elapsedTime = clock.getElapsedTime();
     const delta = clock.getDelta();
 
-    // 3D Scene update
-    buildingScene.update(elapsedTime, delta);
+    try {
+      // 1. Update 3D Scene transformations
+      buildingScene.update(elapsedTime, delta);
 
-    // Camera controller update
-    cameraController.update();
+      // 2. Update Camera controller orbit & parallax
+      cameraController.update();
 
-    // Projected 3D Labels & Connectors update
-    updateFloatingLabels();
+      // 3. WebGL Render first (computes all world matrices & camera projections)
+      buildingScene.render();
 
-    // WebGL Render
-    buildingScene.render();
+      // 4. Update Projected 3D Labels & Connectors with fresh matrix coordinates
+      updateFloatingLabels();
+    } catch (err) {
+      console.error('Animation loop error:', err);
+    }
   }
 
   animate();

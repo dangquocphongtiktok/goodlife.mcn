@@ -16,6 +16,7 @@ class BuildingScene {
     // Initialize DNA Helix Scene
     this.dnaScene = new DnaScene(this.scene, this.camera);
     this.activeModel = this.dnaScene;
+    this.activeMode = 'dna';
 
     this.setupResizeHandler();
   }
