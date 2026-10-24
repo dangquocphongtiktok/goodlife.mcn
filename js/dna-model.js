@@ -236,23 +236,81 @@ class DnaScene {
     });
   }
 
+  createMedicalCrossTexture() {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const center = size / 2; // 64
+
+    // 1. Soft radial background bloom for luminous bioluminescence
+    const radial = ctx.createRadialGradient(center, center, 0, center, center, 56);
+    radial.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+    radial.addColorStop(0.35, 'rgba(255, 255, 255, 0.18)');
+    radial.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = radial;
+    ctx.beginPath();
+    ctx.arc(center, center, 56, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. High-intensity medical cross "+" icon
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = '#ffffff';
+
+    const armLen = 46;   // Total length of arms
+    const armThick = 14; // Thickness of arms
+    const rad = 3.5;     // Soft rounded tips
+
+    function drawRoundedBar(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Horizontal bar of medical cross
+    drawRoundedBar(center - armLen / 2, center - armThick / 2, armLen, armThick, rad);
+    // Vertical bar of medical cross
+    drawRoundedBar(center - armThick / 2, center - armLen / 2, armThick, armLen, rad);
+
+    // 3. Bright core center for crispness
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    drawRoundedBar(center - (armLen - 6) / 2, center - (armThick - 4) / 2, armLen - 6, armThick - 4, 2);
+    drawRoundedBar(center - (armThick - 4) / 2, center - (armLen - 6) / 2, armThick - 4, armLen - 6, 2);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
   buildBioParticleField() {
-    const count = 260;
+    const count = 280;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
-    const scales = new Float32Array(count);
 
     const palette = [
       new THREE.Color(0x38bdf8), // Cyan
       new THREE.Color(0x00a896), // Teal
-      new THREE.Color(0xf59e0b), // Amber
-      new THREE.Color(0x10b981)  // Emerald
+      new THREE.Color(0x10b981), // Emerald
+      new THREE.Color(0x5eead4), // Bright Mint
+      new THREE.Color(0xf59e0b)  // Amber Gold
     ];
 
     for (let i = 0; i < count; i++) {
       // Swirling cylinder around DNA
-      const radius = 1.4 + Math.random() * 3.6;
+      const radius = 1.35 + Math.random() * 3.4;
       const angle = Math.random() * Math.PI * 2;
       const y = -4.2 + Math.random() * 8.4;
 
@@ -264,19 +322,21 @@ class DnaScene {
       colors[i * 3] = col.r;
       colors[i * 3 + 1] = col.g;
       colors[i * 3 + 2] = col.b;
-
-      scales[i] = 0.05 + Math.random() * 0.08;
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
+    const crossTexture = this.createMedicalCrossTexture();
+
     const material = new THREE.PointsMaterial({
-      size: 0.075,
+      size: 0.34,
+      map: crossTexture,
       vertexColors: true,
       transparent: true,
-      opacity: 0.75,
-      blending: THREE.AdditiveBlending
+      opacity: 0.88,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
     });
 
     this.bioParticles = new THREE.Points(geometry, material);
@@ -375,9 +435,10 @@ class DnaScene {
       this.group.rotation.y += delta * 0.22;
     }
 
-    // 2. Slow swirling of bio-particles
+    // 2. Slow swirling & gentle floating of medical '+' bio-particles
     if (this.bioParticles) {
       this.bioParticles.rotation.y -= delta * 0.08;
+      this.bioParticles.position.y = Math.sin(time * 0.75) * 0.08;
     }
 
     // 3. Animate each Grand Node's internal gem and orbital rings
