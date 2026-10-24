@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Goodlife Media — Truyền Thông Y Khoa | 3D Interactive WebGL</title>
+  <meta name="description" content="Trải nghiệm 3D toàn màn hình Goodlife Media — Truyền thông y khoa & Sensory Design. Minimalist High-End Architectural UI.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            mednavy: {
+              900: '#041322',
+              950: '#020b14',
+            },
+            medcyan: '#38bdf8',
+            medteal: '#00a896',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=3.2.0">
+
+  <!-- Three.js & GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body class="bg-[#041322] text-slate-100 antialiased overflow-hidden select-none">
+
+  <!-- Atmospheric Background Glow & Vignette -->
+  <div class="scene-vignette"></div>
+
+  <!-- WebGL 3D Canvas Container -->
+  <div id="webgl-container" class="absolute inset-0 z-0"></div>
+
+  <!-- SVG Connector Lines Layer -->
+  <svg id="svg-connectors"></svg>
+
+  <!-- Floating 3D HTML Labels Layer -->
+  <div id="labels-container"></div>
+
+  <!-- Minimalist Header UI (Zero Clutter) -->
+  <header class="fixed top-0 left-0 right-0 z-30 px-6 py-5 flex items-center justify-between pointer-events-none">
+    
+    <!-- Top-Left: Brand & Logo -->
+    <div class="flex items-center gap-3.5 pointer-events-auto">
+      <div class="relative w-11 h-11 rounded-full overflow-hidden border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/30 group cursor-pointer transition-transform hover:scale-105">
+        <img src="assets/goodlife-logo.png" alt="Good Life Media Logo" class="w-full h-full object-cover">
+      </div>
+      <div>
+        <h1 class="font-heading text-sm md:text-base font-extrabold tracking-wider text-white flex items-center gap-1.5">
+          <span>GOODLIFE MEDIA</span>
+          <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#38bdf8] animate-pulse"></span>
+        </h1>
+        <p class="text-[11px] font-bold tracking-widest uppercase text-cyan-400 font-mono">Truyền Thông Y Khoa</p>
+      </div>
+    </div>
+
+    <!-- Top-Center: Glassmorphism Pill Menu (Absolute Centered) -->
+    <div class="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
+      <nav class="glass-pill px-2.5 py-1.5 md:px-3 md:py-2 rounded-full flex items-center gap-1 md:gap-1.5">
+        <button data-index="0" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all">
+          01. Giới thiệu
+        </button>
+        <button data-index="1" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all">
+          02. Dịch vụ & Báo giá
+        </button>
+        <button data-index="2" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all">
+          03. Sensory Design
+        </button>
+        <button data-index="3" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all">
+          04. FAQ
+        </button>
+      </nav>
+    </div>
+
+    <!-- Top-Right: Sleek CTA Button -->
+    <div class="pointer-events-auto flex items-center gap-3">
+      <button class="btn-open-consultation px-4 md:px-5 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wide text-white bg-slate-900/80 border-1.5 border-cyan-400/60 hover:border-cyan-300 hover:bg-cyan-500/20 shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2 cursor-pointer group">
+        <span class="hidden sm:inline">Nhận tư vấn chiến lược</span>
+        <span class="sm:hidden">Tư vấn</span>
+        <svg class="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Bottom Interaction Hint -->
+  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+    <div class="hint-pill-inline px-4 py-1.5 rounded-full text-[11px] text-slate-400 bg-slate-900/60 border border-white/10 backdrop-blur-md hidden sm:flex items-center gap-2 shadow-lg">
+      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+      <span>Kéo xoay 360° • Click vào Quả Cầu Pha Lê DNA hoặc Menu</span>
+    </div>
+  </div>
+
+  <!-- Floating Zalo Contact Button (Hiệu ứng nổi 3D & Elevation) -->
+  <a href="https://zalo.me/0918600310" target="_blank" rel="noopener noreferrer" class="zalo-floating-widget" title="Liên hệ Zalo Goodlife Media: 0918 600 310">
+    <div class="zalo-ripple-ring"></div>
+    <div class="zalo-ripple-ring-delayed"></div>
+    <div class="zalo-pill-content">
+      <div class="zalo-icon-badge">
+        <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="23" fill="#0068FF"/>
+          <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="900" font-size="15" fill="#ffffff" letter-spacing="-0.4px">Zalo</text>
+        </svg>
+        <span class="zalo-online-dot" title="Đang trực tuyến"></span>
+      </div>
+      <div class="zalo-text-block">
+        <span class="zalo-label-title">Liên Hệ Zalo</span>
+        <span class="zalo-phone-number">0918 600 310</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- Glassmorphism Side Panel (High-End Drawer) -->
+  <aside id="side-panel" class="p-6 md:p-8 flex flex-col justify-between">
+    <div>
+      <!-- Top Action Bar with Close Button -->
+      <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+        <span id="panel-tag" class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 font-mono">
+          Trụ Cột Y Sinh Học
+        </span>
+        <button id="btn-close-panel" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-300 hover:text-white bg-slate-800/70 hover:bg-slate-700/90 border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg hover:border-cyan-400/50">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <span>✕ Quay lại toàn cảnh DNA 3D</span>
+        </button>
+      </div>
+
+      <!-- Title & Subtitle -->
+      <h2 id="panel-title" class="font-heading text-xl md:text-2xl font-bold text-white tracking-tight leading-snug">
+        Tiêu Đề Tầng
+      </h2>
+      <p id="panel-subtitle" class="text-xs text-slate-300 mt-2 leading-relaxed">
+        Phụ đề mô tả ngắn gọn
+      </p>
+
+      <!-- Scrollable Rich Content Body -->
+      <div id="panel-body" class="mt-6 space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto pr-2 custom-scrollbar">
+        <!-- Content dynamically injected from js/data.js -->
+      </div>
+    </div>
+
+    <!-- Panel Footer -->
+    <div class="pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+      <span>Goodlife Media Architecture 3D</span>
+      <span class="text-cyan-400 font-mono">Ver 2.4 High-End</span>
+    </div>
+  </aside>
+
+  <!-- Consultation Modal Dialog -->
+  <div id="modal-consultation" class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-6 md:p-7 relative border border-cyan-500/30 shadow-2xl shadow-cyan-950/60">
+      <button id="btn-close-modal" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div>
+          <h3 class="font-heading text-lg font-bold text-white">Đăng Ký Tư Vấn Chiến Lược</h3>
+          <p class="text-xs text-cyan-400">Thẩm định thương hiệu y tế 1-on-1 cùng Founder & Ekip</p>
+        </div>
+      </div>
+
+      <form id="consultation-form" class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-medium text-slate-300 mb-1">Họ và tên Bác sĩ / Quản lý *</label>
+          <input type="text" id="modal-fullname" name="fullname" required placeholder="BS. Nguyễn Văn A..." class="w-full px-3.5 py-2.5 rounded-lg bg-slate-900/80 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-medium text-slate-300 mb-1">Số điện thoại / Zalo *</label>
+          <input type="tel" id="modal-phone" name="phone" required placeholder="090 123 4567..." class="w-full px-3.5 py-2.5 rounded-lg bg-slate-900/80 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-medium text-slate-300 mb-1">Cơ sở y tế / Chuyên khoa</label>
+          <input type="text" id="modal-facility" name="facility" placeholder="Phòng khám Răng Hàm Mặt, Thẩm mỹ, Da liễu..." class="w-full px-3.5 py-2.5 rounded-lg bg-slate-900/80 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-medium text-slate-300 mb-1">Nhu cầu trọng tâm</label>
+          <select id="modal-service" name="service" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-900/80 border border-slate-700/80 text-xs text-white focus:outline-none focus:border-cyan-400">
+            <option>Gói Truyền Thông Trọn Gói 25 triệu/tháng (30 video + MCN + Ads)</option>
+            <option>Gói Truyền Thông Tiêu Chuẩn 15 triệu/tháng (30 video + MCN)</option>
+            <option>Gói Dịch Vụ Riêng Lẻ (Kịch bản, Quay, Dựng, SEO)</option>
+            <option>Thiết Kế Sensory Design Phòng Khám Đa Giác Quan</option>
+            <option>Tư vấn pháp lý y tế & Chiến lược cùng Founder Đặng Quốc Phong</option>
+          </select>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:brightness-110 shadow-lg shadow-teal-500/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>Gửi Yêu Cầu Tư Vấn Ngay</span>
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+          <p class="text-[10px] text-center text-slate-400 mt-2">Dữ liệu sẽ được gửi thẳng đến email <strong class="text-teal-400 font-mono">goodlife.mcn@gmail.com</strong></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Luxury Preloader -->
+  <div id="preloader">
+    <div class="relative flex items-center justify-center mb-6">
+      <div class="loader-glow-ring"></div>
+      <div class="absolute w-12 h-12 rounded-full overflow-hidden border border-cyan-400/40">
+        <img src="assets/goodlife-logo.png" alt="Logo" class="w-full h-full object-cover">
+      </div>
+    </div>
+    <p class="font-heading text-sm font-bold tracking-widest text-white uppercase">Goodlife Media</p>
+    <p class="text-[10px] font-mono tracking-widest text-cyan-400 uppercase mt-1">Khởi tạo không gian 3D WebGL...</p>
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="js/data.js?v=3.4.0"></script>
+  <script src="js/dna-model.js?v=3.4.0"></script>
+  <script src="js/building.js?v=3.4.0"></script>
+  <script src="js/camera-controller.js?v=3.4.0"></script>
+  <script src="js/app.js?v=3.4.0"></script>
+</body>
+</html>

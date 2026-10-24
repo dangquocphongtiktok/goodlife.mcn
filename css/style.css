@@ -1,0 +1,514 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-dark: #041322;
+  --bg-gradient-top: #030c17;
+  --bg-gradient-bottom: #092642;
+  --accent-cyan: #38bdf8;
+  --accent-teal: #00a896;
+  --accent-emerald: #10b981;
+  --glass-bg: rgba(6, 21, 40, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(56, 189, 248, 0.4);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body, html {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-dark);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #f1f5f9;
+  position: relative;
+}
+
+h1, h2, h3, h4, h5, .font-heading {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Background Atmosphere */
+.scene-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(2, 8, 16, 0.75) 100%),
+              radial-gradient(circle at 50% 20%, rgba(0, 168, 150, 0.08) 0%, transparent 60%);
+  z-index: 1;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-pill {
+  background: rgba(5, 20, 38, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6),
+              0 0 24px -4px rgba(56, 189, 248, 0.2);
+}
+
+/* Top Menu Pill Interaction */
+.menu-item {
+  position: relative;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+}
+
+.menu-item::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 20px;
+  height: 2.5px;
+  background: linear-gradient(90deg, var(--accent-teal), var(--accent-cyan));
+  border-radius: 9999px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.menu-item:hover::after,
+.menu-item.active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.menu-item.active {
+  color: #38bdf8;
+  font-weight: 700;
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+}
+
+.menu-item.hover-sync {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+/* Floating 3D HTML Labels */
+#labels-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.building-label {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: transform, opacity;
+}
+
+.label-card {
+  padding: 8px 18px;
+  border-radius: 9999px;
+  background: rgba(4, 18, 36, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid var(--node-accent, rgba(56, 189, 248, 0.5));
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.8),
+              0 0 20px -2px var(--node-accent, rgba(56, 189, 248, 0.35));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.label-card:hover, .building-label.active .label-card {
+  border-color: var(--node-accent, #38bdf8);
+  background: rgba(6, 26, 54, 0.96);
+  box-shadow: 0 12px 35px -2px rgba(0, 0, 0, 0.85),
+              0 0 30px 4px var(--node-accent, rgba(56, 189, 248, 0.6));
+  transform: scale(1.08);
+}
+
+
+
+.label-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px 2px var(--node-accent, var(--accent-teal));
+  position: relative;
+}
+
+.label-indicator::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid var(--node-accent, var(--accent-cyan));
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* SVG Connector Lines */
+#svg-connectors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.connector-line {
+  stroke: rgba(56, 189, 248, 0.45);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+  transition: stroke 0.3s ease, stroke-width 0.3s ease;
+}
+
+.connector-line.active {
+  stroke: rgba(56, 189, 248, 0.9);
+  stroke-width: 1.8;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 4px #38bdf8);
+}
+
+/* Side Panel Drawer */
+#side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 560px;
+  background: rgba(4, 16, 30, 0.88);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.75),
+              -2px 0 20px rgba(56, 189, 248, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1400px) {
+  #side-panel {
+    max-width: 610px;
+  }
+}
+
+#side-panel.open {
+  transform: translateX(0);
+}
+
+/* Pricing Tab Styling */
+.pricing-tab-btn {
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.pricing-tab-btn.active {
+  background: rgba(0, 168, 150, 0.25);
+  border-color: rgba(0, 168, 150, 0.6);
+  color: #2dd4bf;
+  box-shadow: 0 0 12px -2px rgba(0, 168, 150, 0.4);
+}
+
+/* Sensory Mode Buttons */
+.sensory-btn {
+  cursor: pointer;
+}
+
+.sensory-btn.active {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.7);
+  color: #fbbf24;
+  box-shadow: 0 0 14px -2px rgba(245, 158, 11, 0.4);
+}
+
+/* Calculator Checked Item Highlight */
+.custom-calc-item {
+  transition: all 0.25s ease;
+}
+
+.custom-calc-item:has(input:checked) {
+  border-color: rgba(0, 168, 150, 0.6);
+  background: rgba(8, 38, 56, 0.8);
+  box-shadow: 0 4px 15px -3px rgba(0, 168, 150, 0.2);
+}
+
+/* FAQ Accordion Styling */
+.faq-item {
+  transition: all 0.25s ease;
+}
+
+.faq-item.open {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 4px 20px -4px rgba(16, 185, 129, 0.15);
+}
+
+.faq-item.open .faq-icon {
+  transform: rotate(180deg);
+  color: #34d399;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(4, 19, 34, 0.3);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.25);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.6);
+}
+
+/* Consultation Modal */
+#modal-consultation {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+  z-index: 50;
+}
+
+#modal-consultation.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Instructions Pill at Bottom */
+.hint-pill {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(6, 22, 40, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 20;
+  letter-spacing: 0.02em;
+}
+
+/* Preloader */
+#preloader {
+  position: fixed;
+  inset: 0;
+  background: #030c17;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+
+#preloader.fade-out {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loader-glow-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #38bdf8;
+  border-bottom-color: #00a896;
+  animation: spin 1.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   Floating Zalo Contact Button (Hiệu ứng nổi 3D & Elevation)
+   ============================================================ */
+.zalo-floating-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  animation: float-fab 3.2s ease-in-out infinite;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .zalo-floating-widget {
+    bottom: 28px;
+    right: 28px;
+  }
+}
+
+.zalo-floating-widget:hover {
+  transform: translateY(-6px) scale(1.04);
+}
+
+/* Pulsing Radar Ring Effects */
+.zalo-ripple-ring, .zalo-ripple-ring-delayed {
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 104, 255, 0.7);
+  pointer-events: none;
+  animation: zalo-ripple 2.4s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+
+.zalo-ripple-ring-delayed {
+  animation-delay: 1.2s;
+  border-color: rgba(56, 189, 248, 0.6);
+}
+
+/* Glassmorphism Body */
+.zalo-pill-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 18px 6px 6px;
+  border-radius: 9999px;
+  background: rgba(4, 20, 42, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(0, 132, 255, 0.6);
+  box-shadow: 0 12px 35px -6px rgba(0, 0, 0, 0.8),
+              0 0 20px -2px rgba(0, 104, 255, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.zalo-floating-widget:hover .zalo-pill-content {
+  border-color: #38bdf8;
+  background: rgba(6, 28, 58, 0.95);
+  box-shadow: 0 16px 40px -4px rgba(0, 0, 0, 0.85),
+              0 0 28px 2px rgba(56, 189, 248, 0.65),
+              inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Zalo Circular Icon Badge */
+.zalo-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0068FF, #0084FF);
+  box-shadow: 0 4px 14px rgba(0, 104, 255, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Active Online Green Dot */
+.zalo-online-dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #10b981;
+  border: 2px solid #04142a;
+  box-shadow: 0 0 8px #10b981;
+}
+
+/* Text Container */
+.zalo-text-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.zalo-label-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+.zalo-phone-number {
+  font-family: 'Outfit', 'Plus Jakarta Sans', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+  line-height: 1.25;
+}
+
+/* Floating Animation Keyframes */
+@keyframes float-fab {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes zalo-ripple {
+  0% {
+    transform: translateY(-50%) scale(0.9);
+    opacity: 0.85;
+  }
+  60% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateY(-50%) scale(1.6);
+    opacity: 0;
+  }
+}
