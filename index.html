@@ -329,6 +329,58 @@
           <!-- Video Audit Results Container -->
           <div id="video-audit-results" class="hidden space-y-4 pt-1">
             
+            <!-- 2-TRACK PROCESSING PIPELINE BANNER -->
+            <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-cyan-500/30 space-y-2.5 shadow-xl">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                  <span>Quy Trình Kiểm Duyệt 2 Nhánh Độc Lập Chuẩn TikTok 2026</span>
+                </span>
+                <span id="pipeline-overall-status" class="text-[10px] font-mono text-cyan-300 font-bold px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/30">
+                  Hoàn tất kiểm tra 2 nhánh
+                </span>
+              </div>
+
+              <!-- Two Track Flow Badges -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <!-- Track 1: Voice Pipeline -->
+                <div class="p-2.5 rounded-xl bg-slate-900/80 border border-white/5 space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px] font-bold text-amber-300">
+                    <span class="flex items-center gap-1.5">🎙️ Nhánh 1: Voice / Lời Thoại</span>
+                    <div class="audio-wave-bars" id="audio-wave-indicator" style="display: none;">
+                      <div class="audio-wave-bar"></div>
+                      <div class="audio-wave-bar"></div>
+                      <div class="audio-wave-bar"></div>
+                      <div class="audio-wave-bar"></div>
+                      <div class="audio-wave-bar"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1 flex-wrap text-[9px] font-mono">
+                    <span id="step-voice-1" class="pipeline-step-badge done">1. Tách Audio</span>
+                    <span class="text-slate-600">➔</span>
+                    <span id="step-voice-2" class="pipeline-step-badge done">2. Speech-to-Text (vi-VN)</span>
+                    <span class="text-slate-600">➔</span>
+                    <span id="step-voice-3" class="pipeline-step-badge done">3. Rà soát Từ Cấm</span>
+                  </div>
+                </div>
+
+                <!-- Track 2: Visual Pipeline -->
+                <div class="p-2.5 rounded-xl bg-slate-900/80 border border-white/5 space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px] font-bold text-cyan-300">
+                    <span class="flex items-center gap-1.5">👁️ Nhánh 2: Frame Hình Ảnh</span>
+                    <span id="frame-scan-counter" class="text-[10px] font-mono text-cyan-400 font-bold">12/12 Frames</span>
+                  </div>
+                  <div class="flex items-center gap-1 flex-wrap text-[9px] font-mono">
+                    <span id="step-visual-1" class="pipeline-step-badge done">1. Trích xuất từng Frame</span>
+                    <span class="text-slate-600">➔</span>
+                    <span id="step-visual-2" class="pipeline-step-badge done">2. Quét Máu/Vết mổ</span>
+                    <span class="text-slate-600">➔</span>
+                    <span id="step-visual-3" class="pipeline-step-badge done">3. Bắt Ảnh Vi Phạm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Video Player & Specs Bar -->
             <div class="p-4 rounded-2xl bg-slate-900/80 border border-white/10 flex flex-col md:flex-row items-center gap-4">
               <div class="w-full md:w-56 h-36 rounded-xl overflow-hidden bg-black shrink-0 border border-white/10 flex items-center justify-center">
@@ -351,8 +403,8 @@
                     <strong id="video-res-badge" class="text-cyan-400 font-mono">--</strong>
                   </div>
                   <div class="p-2 rounded-lg bg-slate-950/60 border border-white/5 col-span-2 sm:col-span-1">
-                    <span class="text-[10px] text-slate-400 block">Quét ngầm khung hình:</span>
-                    <strong id="video-frames-count" class="text-emerald-400 font-mono">Hoàn tất</strong>
+                    <span class="text-[10px] text-slate-400 block">Số frame đã rà soát:</span>
+                    <strong id="video-frames-count" class="text-emerald-400 font-mono">12 frames ngầm</strong>
                   </div>
                 </div>
               </div>
@@ -367,25 +419,51 @@
                   <div class="flex items-center gap-2.5">
                     <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm shrink-0">🎙️</span>
                     <div>
-                      <h4 class="text-xs md:text-sm font-bold text-white">Yếu Tố 1: Lỗi Voice / Tiếng Nói Trong Video</h4>
-                      <p class="text-[10px] text-slate-400">Rà soát lời thoại âm thanh phát hiện từ ngữ vi phạm chính sách TikTok</p>
+                      <h4 class="text-xs md:text-sm font-bold text-white">Yếu Tố 1: Voice / Tiếng Nói Trong Video</h4>
+                      <p class="text-[10px] text-slate-400">Xuất voice ➔ Chuyển thành văn bản (Speech-to-Text) ➔ Đối soát từ ngữ vi phạm</p>
                     </div>
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
+                  <div class="flex items-center gap-2 shrink-0 flex-wrap">
                     <span id="voice-score-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
                       Đang phân tích voice...
                     </span>
-                    <button id="btn-autofix-voice" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:brightness-110 shadow-md cursor-pointer transition-all flex items-center gap-1">
+                    <button id="btn-toggle-edit-voice" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 transition-all flex items-center gap-1 cursor-pointer" title="Kiểm tra & chỉnh sửa nếu đoạn voice trích xuất chưa khớp lời nói thực tế">
+                      <span>✏️</span>
+                      <span>Khớp Lời Thoại Thực Tế</span>
+                    </button>
+                    <button id="btn-autofix-voice" type="button" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:brightness-110 shadow-md cursor-pointer transition-all flex items-center gap-1">
                       <span>✨</span>
                       <span>Sửa Voice Chuẩn Y Khoa</span>
                     </button>
                   </div>
                 </div>
 
-                <!-- Highlighted Voice Textbox -->
+                <!-- Voice Edit Drawer (Khớp Lời Thoại Thực Tế) -->
+                <div id="voice-edit-drawer" class="hidden p-3.5 rounded-xl bg-slate-950/95 border border-cyan-500/40 space-y-2.5 shadow-xl">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
+                    <span class="text-cyan-300 font-bold flex items-center gap-1.5">
+                      <span>✍️</span>
+                      <span>Chỉnh sửa / Dán Lời Thoại Thực Tế Của Video:</span>
+                    </span>
+                    <span class="text-[10px] text-slate-400">Khắc phục triệt để tình trạng máy nghe nhầm thuật ngữ y khoa</span>
+                  </div>
+                  <textarea id="voice-manual-textarea" rows="3" class="w-full p-2.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 custom-scrollbar" placeholder="Nhập hoặc dán chính xác lời thoại thực tế trong video vào đây..."></textarea>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] text-slate-500 italic">* Hệ thống sẽ dùng chính xác văn bản này để so khớp bộ lọc TikTok.</span>
+                    <div class="flex items-center gap-2">
+                      <button id="btn-cancel-edit-voice" type="button" class="px-3 py-1 rounded-md text-[11px] text-slate-400 hover:text-white transition-colors cursor-pointer">Đóng</button>
+                      <button id="btn-apply-voice-edit" type="button" class="px-3.5 py-1.5 rounded-lg text-[11px] font-bold text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-300 hover:brightness-110 transition-all shadow-md cursor-pointer flex items-center gap-1">
+                        <span>🔍</span>
+                        <span>Cập Nhật & Rà Soát Lời Thoại Này</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Highlighted Voice Textbox & Editable Area -->
                 <div class="space-y-1.5">
                   <div class="flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Đoạn voice trích xuất từ video (Từ vi phạm được bôi màu):</span>
+                    <span>Lời thoại Speech-to-Text trích xuất (Từ vi phạm được bôi màu):</span>
                     <span id="voice-violation-count" class="font-mono text-rose-400 font-bold">-- vi phạm</span>
                   </div>
                   <div id="video-voice-transcript" class="p-3.5 rounded-xl bg-slate-950/90 border border-white/5 text-xs text-slate-200 leading-relaxed max-h-36 overflow-y-auto custom-scrollbar select-text">
@@ -406,11 +484,11 @@
                     <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm shrink-0">👁️</span>
                     <div>
                       <h4 class="text-xs md:text-sm font-bold text-white">Yếu Tố 2: Khung Hình Vi Phạm Trong Video</h4>
-                      <p class="text-[10px] text-slate-400">Hệ thống quét ngầm toàn bộ khung hình — Chỉ xuất ảnh vi phạm (nếu có)</p>
+                      <p class="text-[10px] text-slate-400">So sánh từng frame với Policy TikTok — Chỉ xuất ảnh nếu dính lỗi (Máu/Vết mổ/Nhạy cảm)</p>
                     </div>
                   </div>
                   <span id="visual-verdict-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-300">
-                    Đang quét...
+                    Đang quét từng frame...
                   </span>
                 </div>
 

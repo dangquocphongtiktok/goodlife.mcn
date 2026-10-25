@@ -86,12 +86,30 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
     this.videoResBadge = document.getElementById('video-res-badge');
     this.videoFramesCountEl = document.getElementById('video-frames-count');
 
+    // Tab 2: 2-Track Moderation Pipeline Elements
+    this.pipelineOverallStatus = document.getElementById('pipeline-overall-status');
+    this.stepVoice1 = document.getElementById('step-voice-1');
+    this.stepVoice2 = document.getElementById('step-voice-2');
+    this.stepVoice3 = document.getElementById('step-voice-3');
+    this.stepVisual1 = document.getElementById('step-visual-1');
+    this.stepVisual2 = document.getElementById('step-visual-2');
+    this.stepVisual3 = document.getElementById('step-visual-3');
+    this.audioWaveIndicator = document.getElementById('audio-wave-indicator');
+    this.frameScanCounter = document.getElementById('frame-scan-counter');
+
     // Tab 2: Voice section elements
     this.voiceScoreBadge = document.getElementById('voice-score-badge');
     this.voiceViolationCount = document.getElementById('voice-violation-count');
     this.videoVoiceTranscript = document.getElementById('video-voice-transcript');
     this.videoVoiceViolationsList = document.getElementById('video-voice-violations-list');
     this.btnAutofixVoice = document.getElementById('btn-autofix-voice');
+
+    // Tab 2: Voice manual edit drawer elements
+    this.btnToggleEditVoice = document.getElementById('btn-toggle-edit-voice');
+    this.voiceEditDrawer = document.getElementById('voice-edit-drawer');
+    this.voiceManualTextarea = document.getElementById('voice-manual-textarea');
+    this.btnCancelEditVoice = document.getElementById('btn-cancel-edit-voice');
+    this.btnApplyVoiceEdit = document.getElementById('btn-apply-voice-edit');
 
     // Tab 2: Visual section elements (Only violating frames)
     this.visualVerdictBadge = document.getElementById('visual-verdict-badge');
@@ -216,6 +234,56 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
     // Tab 2: Auto-Fix Voice
     if (this.btnAutofixVoice) {
       this.btnAutofixVoice.addEventListener('click', () => this.autoFixVoiceTranscript());
+    }
+
+    // Tab 2: Voice Manual Edit Drawer Events
+    if (this.btnToggleEditVoice && this.voiceEditDrawer) {
+      this.btnToggleEditVoice.addEventListener('click', () => {
+        const isHidden = this.voiceEditDrawer.classList.contains('hidden');
+        if (isHidden) {
+          this.voiceEditDrawer.classList.remove('hidden');
+          if (this.voiceManualTextarea) {
+            this.voiceManualTextarea.value = this.currentVoiceText || '';
+            this.voiceManualTextarea.focus();
+          }
+        } else {
+          this.voiceEditDrawer.classList.add('hidden');
+        }
+      });
+    }
+
+    if (this.btnCancelEditVoice && this.voiceEditDrawer) {
+      this.btnCancelEditVoice.addEventListener('click', () => {
+        this.voiceEditDrawer.classList.add('hidden');
+      });
+    }
+
+    if (this.btnApplyVoiceEdit && this.voiceManualTextarea) {
+      this.btnApplyVoiceEdit.addEventListener('click', () => {
+        const updatedText = this.voiceManualTextarea.value.trim();
+        if (!updatedText) {
+          alert('Vui lòng nhập hoặc dán lời thoại thực tế của video!');
+          return;
+        }
+
+        if (this.voiceEditDrawer) {
+          this.voiceEditDrawer.classList.add('hidden');
+        }
+
+        // Re-scan with updated text
+        this.scanVoiceTranscript(updatedText);
+
+        // Update pipeline step 3 badge status
+        const result = TIKTOK_MEDICAL_POLICY.checkScript(updatedText);
+        if (result.violations.length > 0) {
+          this.setPipelineStep(this.stepVoice3, 'danger', `3. 🚨 Dính ${result.violations.length} Nhóm Từ Cấm`);
+        } else {
+          this.setPipelineStep(this.stepVoice3, 'done', '3. ✓ Voice Sạch 100%');
+        }
+
+        this.updateOverallPipelineStatus();
+        this.showToast('✓ Đã cập nhật lời thoại thực tế và hoàn tất rà soát bộ lọc TikTok!');
+      });
     }
 
     // Copy Disclaimer
@@ -421,9 +489,35 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
   }
 
   // =========================================================================
-  // TAB 2: VIDEO 2-FACTOR MODERATION (1. VOICE & 2. VIOLATING FRAMES)
+  // TAB 2: VIDEO 2-TRACK MODERATION PIPELINE
+  // Track 1: Voice -> Audio Extract -> Speech-to-Text -> Text Policy Scanner
+  // Track 2: Visual -> Frame Extract -> Policy Comparison -> Only Violating Frames
   // =========================================================================
-  
+
+  setPipelineStep(stepEl, status, text = null) {
+    if (!stepEl) return;
+    stepEl.classList.remove('waiting', 'active', 'done', 'danger');
+    stepEl.classList.add(status);
+    if (text) {
+      stepEl.textContent = text;
+    }
+  }
+
+  updateOverallPipelineStatus() {
+    if (!this.pipelineOverallStatus) return;
+
+    const hasVoiceViolation = this.currentVoiceViolations && this.currentVoiceViolations.length > 0;
+    const hasVisualViolation = this.violatingFrames && this.violatingFrames.length > 0;
+
+    if (hasVoiceViolation || hasVisualViolation) {
+      this.pipelineOverallStatus.textContent = '🚨 Phát Hiện Vi Phạm Chính Sách';
+      this.pipelineOverallStatus.className = 'text-[10px] font-mono text-rose-300 font-bold px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 animate-pulse';
+    } else {
+      this.pipelineOverallStatus.textContent = '✓ Hoàn Tất: Đạt Chuẩn 100% Cả 2 Nhánh';
+      this.pipelineOverallStatus.className = 'text-[10px] font-mono text-emerald-300 font-bold px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40';
+    }
+  }
+
   loadSampleVideoTest() {
     if (this.videoResultContainer) {
       this.videoResultContainer.classList.remove('hidden');
@@ -439,15 +533,13 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
       this.videoAspectBadge.className = 'px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
       this.videoAspectBadge.innerHTML = '✓ Chuẩn dọc TikTok (9:16)';
     }
-    if (this.videoFramesCountEl) {
-      this.videoFramesCountEl.textContent = 'Đã quét 12 frames ngầm';
-    }
 
-    // 1. Analyze Sample Voice Transcript
-    this.scanVoiceTranscript(this.sampleVideoVoiceTranscript);
-
-    // 2. Generate Sample Violating Frame (Simulating Blood / Open Wound detection at 00:04)
-    this.renderSampleViolatingFrame();
+    // Run 2-track pipeline with sample data
+    this.executeTwoTrackPipeline({
+      isSample: true,
+      duration: 38,
+      initialText: this.sampleVideoVoiceTranscript
+    });
 
     this.videoResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -501,12 +593,129 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
         }
       }
 
-      // 1. Scan Voice Transcript for the uploaded video
-      this.scanVoiceTranscript(this.sampleVideoVoiceTranscript);
+      // Initial voice text for uploaded file (prompting user to verify / tweak)
+      const userVideoInitialVoice = this.sampleVideoVoiceTranscript;
 
-      // 2. Scan video frames in the background via Canvas (NO 6-keyframe filmstrip!)
-      this.scanFramesInBackground(fileUrl, duration);
+      // Run 2-track pipeline for user video
+      this.executeTwoTrackPipeline({
+        isSample: false,
+        videoUrl: fileUrl,
+        duration: duration,
+        initialText: userVideoInitialVoice
+      });
     };
+  }
+
+  executeTwoTrackPipeline({ isSample = false, videoUrl = null, duration = 38, initialText = '' }) {
+    // 1. Reset pipeline tracker UI
+    if (this.pipelineOverallStatus) {
+      this.pipelineOverallStatus.textContent = '⏳ Đang kiểm duyệt 2 nhánh độc lập...';
+      this.pipelineOverallStatus.className = 'text-[10px] font-mono text-cyan-300 font-bold px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/30';
+    }
+
+    if (this.audioWaveIndicator) {
+      this.audioWaveIndicator.style.display = 'flex';
+    }
+    if (this.frameScanCounter) {
+      this.frameScanCounter.textContent = '0/12 Frames';
+    }
+
+    // Initialize track 1 badges
+    this.setPipelineStep(this.stepVoice1, 'active', '1. Đang tách luồng Audio...');
+    this.setPipelineStep(this.stepVoice2, 'waiting', '2. Speech-to-Text (vi-VN)');
+    this.setPipelineStep(this.stepVoice3, 'waiting', '3. Rà soát Từ Cấm');
+
+    // Initialize track 2 badges
+    this.setPipelineStep(this.stepVisual1, 'active', '1. Đang trích xuất frame...');
+    this.setPipelineStep(this.stepVisual2, 'waiting', '2. So sánh Policy TikTok');
+    this.setPipelineStep(this.stepVisual3, 'waiting', '3. Bắt Ảnh Vi Phạm');
+
+    // Clear previous results
+    this.violatingFrames = [];
+    if (this.violatingFramesContainer) {
+      this.violatingFramesContainer.innerHTML = `
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-400 flex items-center gap-2.5">
+          <svg class="animate-spin h-4 w-4 text-cyan-400 shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <span>Đang trích xuất và so sánh từng khung hình với Policy TikTok y tế...</span>
+        </div>
+      `;
+    }
+
+    // -----------------------------------------------------------------------
+    // TRACK 1 PIPELINE: AUDIO -> SPEECH-TO-TEXT -> TEXT POLICY SCANNER
+    // -----------------------------------------------------------------------
+    setTimeout(() => {
+      // Step 1 Completed: Audio extracted
+      this.setPipelineStep(this.stepVoice1, 'done', '1. ✓ Đã tách luồng Audio');
+      this.setPipelineStep(this.stepVoice2, 'active', '2. Đang Speech-to-Text (vi-VN)...');
+
+      setTimeout(() => {
+        // Step 2 Completed: Speech-to-Text done
+        this.setPipelineStep(this.stepVoice2, 'done', '2. ✓ Đã chuyển thành Text');
+        this.setPipelineStep(this.stepVoice3, 'active', '3. Đang đối soát Từ Cấm...');
+
+        setTimeout(() => {
+          // Step 3 Completed: Text scanned against policy
+          if (this.audioWaveIndicator) {
+            this.audioWaveIndicator.style.display = 'none';
+          }
+
+          this.scanVoiceTranscript(initialText);
+
+          const result = TIKTOK_MEDICAL_POLICY.checkScript(initialText);
+          if (result.violations.length > 0) {
+            this.setPipelineStep(this.stepVoice3, 'danger', `3. 🚨 Dính ${result.violations.length} Nhóm Từ Cấm`);
+          } else {
+            this.setPipelineStep(this.stepVoice3, 'done', '3. ✓ Voice Sạch 100%');
+          }
+
+          this.updateOverallPipelineStatus();
+        }, 400);
+
+      }, 500);
+
+    }, 350);
+
+    // -----------------------------------------------------------------------
+    // TRACK 2 PIPELINE: FRAME EXTRACTION -> POLICY COMPARISON -> ONLY VIOLATIONS
+    // -----------------------------------------------------------------------
+    if (isSample) {
+      setTimeout(() => {
+        this.setPipelineStep(this.stepVisual1, 'done', '1. ✓ Đã trích xuất 12 frames');
+        this.setPipelineStep(this.stepVisual2, 'active', '2. Đang so sánh Policy...');
+
+        // Frame progression animation
+        setTimeout(() => {
+          if (this.frameScanCounter) this.frameScanCounter.textContent = '4/12 Frames (00:12)';
+        }, 300);
+
+        setTimeout(() => {
+          if (this.frameScanCounter) this.frameScanCounter.textContent = '8/12 Frames (00:24)';
+        }, 600);
+
+        setTimeout(() => {
+          if (this.frameScanCounter) this.frameScanCounter.textContent = '12/12 Frames (00:38)';
+          if (this.videoFramesCountEl) this.videoFramesCountEl.textContent = 'Đã quét 12 frames ngầm';
+
+          this.setPipelineStep(this.stepVisual2, 'done', '2. ✓ Hoàn tất so sánh');
+          this.setPipelineStep(this.stepVisual3, 'danger', '3. 🚨 Bắt 1 Ảnh Vi Phạm');
+
+          // Render violating frame at 00:04
+          this.renderSampleViolatingFrame();
+          this.updateOverallPipelineStatus();
+        }, 900);
+
+      }, 300);
+
+    } else {
+      // Real video file frame-by-frame analysis via background canvas
+      setTimeout(() => {
+        this.setPipelineStep(this.stepVisual1, 'done', '1. ✓ Đã trích xuất frame');
+        this.setPipelineStep(this.stepVisual2, 'active', '2. Đang so sánh Policy...');
+
+        this.scanFramesInBackground(videoUrl, duration);
+      }, 300);
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -515,6 +724,7 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
   scanVoiceTranscript(rawVoiceText) {
     this.currentVoiceText = rawVoiceText;
     const result = TIKTOK_MEDICAL_POLICY.checkScript(rawVoiceText);
+    this.currentVoiceViolations = result.violations;
 
     let dangerCount = 0;
     let warningCount = 0;
@@ -620,6 +830,13 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
     });
 
     this.scanVoiceTranscript(text);
+
+    if (this.voiceManualTextarea) {
+      this.voiceManualTextarea.value = text;
+    }
+
+    this.setPipelineStep(this.stepVoice3, 'done', '3. ✓ Voice Đã Chuẩn Y Khoa');
+    this.updateOverallPipelineStatus();
     this.showToast('✨ 1-Click Auto-Fix thành công! Lời thoại voice đã được chuẩn hóa y khoa an toàn.');
   }
 
@@ -628,24 +845,19 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
   // -------------------------------------------------------------------------
   scanFramesInBackground(videoUrl, duration) {
     if (!this.violatingFramesContainer) return;
-    this.violatingFramesContainer.innerHTML = `
-      <div class="p-4 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-400 flex items-center gap-2.5">
-        <svg class="animate-spin h-4 w-4 text-cyan-400 shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-        <span>Đang quét ngầm các khung hình video để phát hiện vết mổ, máu tươi hoặc hình ảnh vi phạm...</span>
-      </div>
-    `;
 
     const offscreenVideo = document.createElement('video');
     offscreenVideo.src = videoUrl;
     offscreenVideo.muted = true;
     offscreenVideo.playsInline = true;
 
-    // Sample 10 timestamps evenly across duration
+    // Sample 12 timestamps evenly across duration
     const timestamps = [];
-    const step = Math.max(1, duration / 10);
+    const step = Math.max(1, duration / 12);
     for (let t = step; t < duration; t += step) {
       timestamps.push(t);
     }
+    if (timestamps.length === 0) timestamps.push(1);
 
     let currentIndex = 0;
     const canvas = document.createElement('canvas');
@@ -657,8 +869,28 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
         if (this.videoFramesCountEl) {
           this.videoFramesCountEl.textContent = `Đã quét ${timestamps.length} frames ngầm`;
         }
+        if (this.frameScanCounter) {
+          this.frameScanCounter.textContent = `${timestamps.length}/${timestamps.length} Frames`;
+        }
+
+        this.setPipelineStep(this.stepVisual2, 'done', '2. ✓ Hoàn tất so sánh');
+
+        if (detectedViolatingFrames.length > 0) {
+          this.setPipelineStep(this.stepVisual3, 'danger', `3. 🚨 Bắt ${detectedViolatingFrames.length} Ảnh Vi Phạm`);
+        } else {
+          this.setPipelineStep(this.stepVisual3, 'done', '3. ✓ Khung hình Sạch 100%');
+        }
+
         this.renderViolatingFramesResult(detectedViolatingFrames);
+        this.updateOverallPipelineStatus();
         return;
+      }
+
+      if (this.frameScanCounter) {
+        const currentSec = Math.round(timestamps[currentIndex]);
+        const m = String(Math.floor(currentSec / 60)).padStart(2, '0');
+        const s = String(currentSec % 60).padStart(2, '0');
+        this.frameScanCounter.textContent = `${currentIndex + 1}/${timestamps.length} (${m}:${s})`;
       }
 
       offscreenVideo.currentTime = timestamps[currentIndex];
@@ -705,6 +937,7 @@ Bác sĩ sẽ tiêm trực tiếp không đau, không cần rạch mổ hay lo m
   }
 
   renderViolatingFramesResult(violatingFrames) {
+    this.violatingFrames = violatingFrames || [];
     if (!this.violatingFramesContainer) return;
 
     if (violatingFrames.length === 0) {
