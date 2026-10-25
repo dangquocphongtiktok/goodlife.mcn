@@ -307,89 +307,127 @@
           </div>
         </div>
 
-        <!-- ================= TAB 2: VIDEO KEYFRAME ANALYZER ================= -->
+        <!-- ================= TAB 2: VIDEO AUDIT (VOICE & VISUAL VIOLATIONS) ================= -->
         <div id="tab-pane-video" class="audit-tab-pane hidden space-y-4">
           
-          <!-- Dropzone -->
-          <div id="video-dropzone" class="p-7 rounded-2xl border-2 border-dashed border-slate-700 hover:border-cyan-400/80 bg-slate-950/60 hover:bg-cyan-500/5 transition-all text-center cursor-pointer group">
+          <!-- Dropzone & Upload Action -->
+          <div id="video-dropzone" class="p-6 rounded-2xl border-2 border-dashed border-slate-700 hover:border-cyan-400/80 bg-slate-950/60 hover:bg-cyan-500/5 transition-all text-center cursor-pointer group">
             <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/quicktime" class="hidden">
-            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform border border-cyan-400/30">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto mb-2.5 group-hover:scale-110 transition-transform border border-cyan-400/30">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
             </div>
-            <h4 class="text-sm font-bold text-white mb-1">Kéo thả file video TikTok vào đây hoặc bấm để chọn file</h4>
-            <p class="text-xs text-slate-400">Hỗ trợ định dạng MP4, WebM, QuickTime (MOV). Video được xử lý trực tiếp an toàn trên trình duyệt.</p>
+            <h4 class="text-xs md:text-sm font-bold text-white mb-1">Kéo thả file video TikTok vào đây hoặc bấm để chọn file</h4>
+            <p class="text-[11px] text-slate-400">Hệ thống tự động rà soát 2 lỗi cốt lõi: <strong>1) Lời thoại Voice vi phạm</strong> & <strong>2) Khung hình vi phạm (nếu có)</strong></p>
             <div class="flex items-center justify-center gap-2 mt-3">
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Tự trích xuất 6 Keyframes</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Đo chuẩn dọc 9:16</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Checklist 5 Tiêu chuẩn Y khoa</span>
+              <button type="button" id="btn-sample-video" class="px-3.5 py-1.5 rounded-lg text-[11px] font-semibold text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm">
+                <span>💡</span>
+                <span>Dùng thử Video & Voice mẫu vi phạm</span>
+              </button>
             </div>
           </div>
 
           <!-- Video Audit Results Container -->
           <div id="video-audit-results" class="hidden space-y-4 pt-1">
             
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              <!-- Left: Video Player & Specs -->
-              <div class="lg:col-span-5 p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
-                <div class="relative rounded-xl overflow-hidden bg-black aspect-[9/16] max-h-72 mx-auto flex items-center justify-center border border-white/10">
-                  <video id="audit-video-player" controls playsinline class="w-full h-full object-contain"></video>
-                </div>
-
-                <!-- Video Specs Row -->
-                <div class="space-y-1.5 pt-1">
-                  <div class="flex items-center justify-between text-xs">
-                    <span class="text-slate-400">Tỷ lệ khung hình:</span>
-                    <span id="video-aspect-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">Đang phân tích...</span>
-                  </div>
-                  <div class="flex items-center justify-between text-xs">
-                    <span class="text-slate-400">Thời lượng video:</span>
-                    <span id="video-duration-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300">--s</span>
-                  </div>
-                  <div class="flex items-center justify-between text-xs">
-                    <span class="text-slate-400">Độ phân giải:</span>
-                    <span id="video-res-badge" class="text-[11px] font-mono text-cyan-400 font-bold">--</span>
-                  </div>
-                </div>
+            <!-- Video Player & Specs Bar -->
+            <div class="p-4 rounded-2xl bg-slate-900/80 border border-white/10 flex flex-col md:flex-row items-center gap-4">
+              <div class="w-full md:w-56 h-36 rounded-xl overflow-hidden bg-black shrink-0 border border-white/10 flex items-center justify-center">
+                <video id="audit-video-player" controls playsinline class="w-full h-full object-contain"></video>
               </div>
-
-              <!-- Right: 6 Keyframes Filmstrip & Checklist -->
-              <div class="lg:col-span-7 space-y-3.5">
-                
-                <!-- Filmstrip Card -->
-                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-white flex items-center gap-1.5">
-                      <span>🎞️ Dải 6 Khung Hình Đại Diện (Keyframes):</span>
-                    </span>
-                    <span class="text-[10px] text-cyan-400 font-mono">Bấm ảnh để tua video</span>
-                  </div>
-                  <div id="keyframe-filmstrip" class="keyframe-filmstrip custom-scrollbar">
-                    <!-- Keyframe canvas thumbnails injected dynamically -->
-                  </div>
-                  <p id="keyframe-status-text" class="text-[10px] text-slate-400 italic">
-                    Đang giải mã khung hình video...
-                  </p>
-                </div>
-
-                <!-- 5-Point Visual Checklist -->
-                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-2.5">
-                  <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Checklist 5 Tiêu Chuẩn Hình Ảnh Y Khoa TikTok:</span>
+              <div class="flex-1 w-full space-y-2">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-xs font-bold text-white flex items-center gap-2">
+                    <span>🎬 Thông Số Kỹ Thuật Video</span>
                   </h4>
-                  <div id="visual-checklist-items" class="space-y-2">
-                    <!-- Injected dynamically -->
+                  <span id="video-aspect-badge" class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">Đang quét...</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-xs">
+                  <div class="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                    <span class="text-[10px] text-slate-400 block">Thời lượng:</span>
+                    <strong id="video-duration-badge" class="text-cyan-400 font-mono">--s</strong>
+                  </div>
+                  <div class="p-2 rounded-lg bg-slate-950/60 border border-white/5">
+                    <span class="text-[10px] text-slate-400 block">Độ phân giải:</span>
+                    <strong id="video-res-badge" class="text-cyan-400 font-mono">--</strong>
+                  </div>
+                  <div class="p-2 rounded-lg bg-slate-950/60 border border-white/5 col-span-2 sm:col-span-1">
+                    <span class="text-[10px] text-slate-400 block">Quét ngầm khung hình:</span>
+                    <strong id="video-frames-count" class="text-emerald-400 font-mono">Hoàn tất</strong>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            <!-- Mandatory Disclaimer Copy Box -->
+            <!-- 2-FACTOR AUDIT RESULTS: 1) VOICE TIẾNG NÓI & 2) HÌNH ẢNH VI PHẠM -->
+            <div class="space-y-4">
+              
+              <!-- SECTION 1: VOICE / TIẾNG NÓI TRONG VIDEO -->
+              <div class="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-white/5">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm shrink-0">🎙️</span>
+                    <div>
+                      <h4 class="text-xs md:text-sm font-bold text-white">Yếu Tố 1: Lỗi Voice / Tiếng Nói Trong Video</h4>
+                      <p class="text-[10px] text-slate-400">Rà soát lời thoại âm thanh phát hiện từ ngữ vi phạm chính sách TikTok</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span id="voice-score-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      Đang phân tích voice...
+                    </span>
+                    <button id="btn-autofix-voice" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:brightness-110 shadow-md cursor-pointer transition-all flex items-center gap-1">
+                      <span>✨</span>
+                      <span>Sửa Voice Chuẩn Y Khoa</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Highlighted Voice Textbox -->
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px] text-slate-400">
+                    <span>Đoạn voice trích xuất từ video (Từ vi phạm được bôi màu):</span>
+                    <span id="voice-violation-count" class="font-mono text-rose-400 font-bold">-- vi phạm</span>
+                  </div>
+                  <div id="video-voice-transcript" class="p-3.5 rounded-xl bg-slate-950/90 border border-white/5 text-xs text-slate-200 leading-relaxed max-h-36 overflow-y-auto custom-scrollbar select-text">
+                    <!-- Highlighted voice script injected dynamically -->
+                  </div>
+                </div>
+
+                <!-- Violating Voice Keywords List -->
+                <div id="video-voice-violations-list" class="space-y-2">
+                  <!-- Injected dynamically like Tab 1 -->
+                </div>
+              </div>
+
+              <!-- SECTION 2: HÌNH ẢNH VI PHẠM (CHỈ XUẤT KHUNG HÌNH VI PHẠM NẾU CÓ) -->
+              <div class="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
+                <div class="flex items-center justify-between pb-2.5 border-b border-white/5">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm shrink-0">👁️</span>
+                    <div>
+                      <h4 class="text-xs md:text-sm font-bold text-white">Yếu Tố 2: Khung Hình Vi Phạm Trong Video</h4>
+                      <p class="text-[10px] text-slate-400">Hệ thống quét ngầm toàn bộ khung hình — Chỉ xuất ảnh vi phạm (nếu có)</p>
+                    </div>
+                  </div>
+                  <span id="visual-verdict-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-300">
+                    Đang quét...
+                  </span>
+                </div>
+
+                <!-- Violating Frames Container: Only displayed if violations are found, else shows clean badge -->
+                <div id="violating-frames-container" class="space-y-3">
+                  <!-- Injected dynamically: either violating frame cards or clean safe card -->
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Mandatory Disclaimer Box -->
             <div class="p-3.5 rounded-xl bg-slate-900/70 border border-white/10 flex items-center justify-between gap-3">
               <div class="flex items-center gap-2.5">
                 <span class="text-base">📜</span>
                 <div>
-                  <span class="text-xs font-bold text-white">Nhãn Miễn trừ y khoa chuẩn bắt buộc (Disclaimer):</span>
+                  <span class="text-xs font-bold text-white">Nhãn Miễn trừ y khoa chuẩn bắt buộc (Disclaimer chèn chân video):</span>
                   <p class="text-[11px] text-slate-400 font-mono mt-0.5">"Thông tin mang tính tham khảo chuyên môn. Người bệnh cần thăm khám trực tiếp cùng bác sĩ chuyên khoa để có phác đồ điều trị phù hợp."</p>
                 </div>
               </div>
@@ -406,7 +444,7 @@
                   <h4 class="text-xs md:text-sm font-extrabold text-white">Goodlife Media — MCN Đối Tác TikTok Trong Lĩnh Vực Y Khoa</h4>
                 </div>
                 <p class="text-[11px] text-slate-300 leading-relaxed">
-                  Ekip Goodlife Media cung cấp đội ngũ quay phim, hậu kỳ chỉnh màu khử máu (Desaturation), che mờ bảo mật bệnh nhân và dựng video dọc 9:16 chuẩn y khoa.
+                  Ekip Goodlife Media chịu trách nhiệm duyệt kịch bản voice, quay dựng khử máu và lọc hình ảnh chuẩn y khoa trước khi đăng, cam kết an toàn kênh 100%.
                 </p>
               </div>
               <button class="btn-audit-cta-consult px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:brightness-110 shadow-lg shadow-teal-500/30 whitespace-nowrap cursor-pointer transition-all shrink-0">
