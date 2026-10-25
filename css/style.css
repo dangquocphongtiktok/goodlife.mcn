@@ -530,19 +530,20 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ============================================================
-   Floating TikTok Audit Button (Hiệu ứng nổi 3D Bottom-Left)
+   Floating Content Audit Button (Hiệu ứng nổi 3D Phía Trên Zalo)
    ============================================================ */
 .tiktok-floating-widget {
   position: fixed;
-  bottom: 24px;
-  left: 24px;
+  bottom: 94px;
+  right: 24px;
+  left: auto;
   z-index: 35;
   display: flex;
   align-items: center;
   border: none;
   background: transparent;
   cursor: pointer;
-  animation: float-fab-tiktok 3.4s ease-in-out infinite;
+  animation: float-fab-tiktok 3.6s ease-in-out infinite;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
   user-select: none;
   padding: 0;
@@ -550,8 +551,9 @@ h1, h2, h3, h4, h5, .font-heading {
 
 @media (min-width: 768px) {
   .tiktok-floating-widget {
-    bottom: 28px;
-    left: 28px;
+    bottom: 100px;
+    right: 28px;
+    left: auto;
   }
 }
 
@@ -671,8 +673,9 @@ h1, h2, h3, h4, h5, .font-heading {
 /* Mobile responsiveness: compact circle badge on very small screens */
 @media (max-width: 640px) {
   .tiktok-floating-widget {
-    bottom: 20px;
-    left: 16px;
+    bottom: 84px;
+    right: 16px;
+    left: auto;
   }
   .tiktok-text-block {
     display: none;
