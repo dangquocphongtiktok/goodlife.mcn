@@ -82,8 +82,15 @@
       </nav>
     </div>
 
-    <!-- Top-Right: Sleek CTA Button -->
-    <div class="pointer-events-auto flex items-center gap-3">
+    <!-- Top-Right: Sleek CTA & TikTok Audit Buttons -->
+    <div class="pointer-events-auto flex items-center gap-2.5">
+      <button class="btn-open-tiktok-audit btn-header-audit px-3.5 md:px-4 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wide text-white flex items-center gap-2 cursor-pointer group shadow-lg" title="Mở Trợ lý Kiểm duyệt TikTok Y Khoa">
+        <span>🛡️</span>
+        <span class="hidden sm:inline">Kiểm duyệt TikTok</span>
+        <span class="sm:hidden">Kiểm duyệt</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#38bdf8] animate-pulse"></span>
+      </button>
+
       <button class="btn-open-consultation px-4 md:px-5 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wide text-white bg-slate-900/80 border-1.5 border-cyan-400/60 hover:border-cyan-300 hover:bg-cyan-500/20 shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2 cursor-pointer group">
         <span class="hidden sm:inline">Nhận tư vấn chiến lược</span>
         <span class="sm:hidden">Tư vấn</span>
@@ -155,6 +162,265 @@
       <span class="text-cyan-400 font-mono">Ver 2.4 High-End</span>
     </div>
   </aside>
+
+  <!-- TikTok Medical Audit Mini-App Modal Dialog -->
+  <div id="modal-tiktok-audit" class="fixed inset-0 bg-black/85 backdrop-blur-xl flex items-center justify-center p-3 md:p-6 z-50">
+    <div class="tiktok-audit-dialog w-full max-w-4xl max-h-[92vh] rounded-2xl md:rounded-3xl p-5 md:p-7 flex flex-col relative overflow-hidden">
+      
+      <!-- Top Action Bar -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-white/10 mb-4 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-lg shadow-lg shadow-cyan-500/20">
+            🛡️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-heading text-base md:text-lg font-bold text-white tracking-wide">Trợ Lý Kiểm Duyệt TikTok Y Khoa</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">MCN Standard</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Hệ thống AI quét chính sách kịch bản & hình ảnh y tế chuẩn TikTok 2026 — Goodlife Media</p>
+          </div>
+        </div>
+
+        <button id="btn-close-tiktok-audit" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors cursor-pointer" title="Đóng cửa sổ">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="flex items-center gap-2 pb-3 shrink-0">
+        <button data-tab="script" class="audit-tab-btn active px-4 md:px-5 py-2 rounded-xl text-xs font-bold border border-white/10 flex items-center gap-2 cursor-pointer">
+          <span>📝</span>
+          <span>Tải Kịch Bản Lên (Text Audit)</span>
+        </button>
+        <button data-tab="video" class="audit-tab-btn px-4 md:px-5 py-2 rounded-xl text-xs font-bold text-slate-400 border border-white/10 flex items-center gap-2 cursor-pointer">
+          <span>🎬</span>
+          <span>Tải Video Lên (Keyframes & Policy)</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
+        
+        <!-- ================= TAB 1: SCRIPT SCANNER ================= -->
+        <div id="tab-pane-script" class="audit-tab-pane space-y-4">
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <label for="audit-script-input" class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <span>Dán nội dung kịch bản hoặc lời thoại video:</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <span id="script-char-count" class="text-[10px] font-mono text-slate-500">0 ký tự</span>
+                <button type="button" id="btn-sample-script" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-cyan-300 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 transition-all flex items-center gap-1 cursor-pointer">
+                  <span>💡</span>
+                  <span>Dùng thử kịch bản vi phạm mẫu</span>
+                </button>
+                <button type="button" id="btn-clear-script" class="px-2 py-1 rounded-lg text-[11px] font-medium text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
+                  Xóa
+                </button>
+              </div>
+            </div>
+
+            <textarea id="audit-script-input" rows="4" placeholder="Ví dụ: Bác sĩ chia sẻ phác đồ chăm sóc da mụn chuẩn y khoa tại nhà..." class="w-full p-3.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 leading-relaxed font-sans resize-y"></textarea>
+
+            <div class="flex items-center justify-between pt-1">
+              <p class="text-[11px] text-slate-400">Kiểm tra tức thì các nhóm: <strong class="text-slate-300">Cam kết 100%, Chèo kéo giá, Thuốc nhạy cảm, Phóng đại sợ hãi</strong></p>
+              <button id="btn-scan-script" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:brightness-110 shadow-lg shadow-teal-500/25 transition-all flex items-center gap-2 cursor-pointer">
+                <span>⚡</span>
+                <span>Quét Chính Sách TikTok</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Script Audit Results Box -->
+          <div id="audit-script-results" class="hidden space-y-4 pt-1">
+            
+            <!-- Safety Score Card -->
+            <div class="p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 via-slate-900/80 to-slate-950 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+              <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-slate-950 border border-white/10 flex flex-col items-center justify-center shrink-0 shadow-inner">
+                  <span id="audit-score-value" class="text-2xl font-black font-mono text-emerald-400">100/100</span>
+                  <span class="text-[9px] uppercase tracking-wider text-slate-500 font-bold">Điểm an toàn</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <span id="audit-score-badge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      An Toàn Đăng Tải
+                    </span>
+                  </div>
+                  <p id="audit-score-description" class="text-xs text-slate-300 leading-relaxed">
+                    Kịch bản đạt chuẩn y khoa chuẩn mực, không có từ ngữ cấm hoặc cam kết quá đà.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 1-Click Auto-Fix Action -->
+              <div class="shrink-0 flex items-center gap-2">
+                <button id="btn-autofix-script" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-300 hover:brightness-110 shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <span>✨</span>
+                  <span>1-Click Tự Động Sửa An Toàn</span>
+                </button>
+                <button id="btn-copy-clean-script" class="px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-white/10 transition-all cursor-pointer" title="Sao chép kịch bản">
+                  📋
+                </button>
+              </div>
+            </div>
+
+            <!-- Highlighted Script Display -->
+            <div class="p-4 rounded-2xl bg-slate-950/90 border border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-300">Kịch bản đã được rà soát (Từ vi phạm được bôi màu):</span>
+                <div class="flex items-center gap-3 text-[10px]">
+                  <span class="flex items-center gap-1 text-rose-400"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Nguy hiểm (Cấm)</span>
+                  <span class="flex items-center gap-1 text-amber-400"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Cảnh báo (Bóp tương tác)</span>
+                </div>
+              </div>
+              <div id="audit-highlighted-script" class="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 text-xs text-slate-200 leading-relaxed max-h-40 overflow-y-auto custom-scrollbar select-text">
+                <!-- Highlighted words injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Detailed Violations List -->
+            <div class="space-y-2.5">
+              <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Chi Tiết Cảnh Báo Thuật Toán & Đề Xuất Chỉnh Sửa</h4>
+              <div id="audit-violations-list" class="space-y-2.5">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Conversion Funnel: Lead Magnet Card -->
+            <div class="p-4 rounded-2xl bg-gradient-to-r from-teal-950/60 via-slate-900/80 to-cyan-950/60 border border-teal-500/40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-teal-400 text-sm">🌟</span>
+                  <h4 class="text-xs md:text-sm font-extrabold text-white">Goodlife Media — MCN Đối Tác TikTok Trong Lĩnh Vực Y Khoa</h4>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-relaxed">
+                  Đừng để kênh y tế bị bóp tương tác hoặc dính gậy vi phạm vì lỗi kịch bản/hình ảnh. Hãy để ekip Goodlife Media đồng hành sản xuất trọn gói 30 video/tháng chuẩn y khoa từ A-Z.
+                </p>
+              </div>
+              <button class="btn-audit-cta-consult px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:brightness-110 shadow-lg shadow-teal-500/30 whitespace-nowrap cursor-pointer transition-all shrink-0">
+                Nhận Tư Vấn Chiến Lược 1-on-1 ➔
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================= TAB 2: VIDEO KEYFRAME ANALYZER ================= -->
+        <div id="tab-pane-video" class="audit-tab-pane hidden space-y-4">
+          
+          <!-- Dropzone -->
+          <div id="video-dropzone" class="p-7 rounded-2xl border-2 border-dashed border-slate-700 hover:border-cyan-400/80 bg-slate-950/60 hover:bg-cyan-500/5 transition-all text-center cursor-pointer group">
+            <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/quicktime" class="hidden">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform border border-cyan-400/30">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1">Kéo thả file video TikTok vào đây hoặc bấm để chọn file</h4>
+            <p class="text-xs text-slate-400">Hỗ trợ định dạng MP4, WebM, QuickTime (MOV). Video được xử lý trực tiếp an toàn trên trình duyệt.</p>
+            <div class="flex items-center justify-center gap-2 mt-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Tự trích xuất 6 Keyframes</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Đo chuẩn dọc 9:16</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">Checklist 5 Tiêu chuẩn Y khoa</span>
+            </div>
+          </div>
+
+          <!-- Video Audit Results Container -->
+          <div id="video-audit-results" class="hidden space-y-4 pt-1">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              <!-- Left: Video Player & Specs -->
+              <div class="lg:col-span-5 p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
+                <div class="relative rounded-xl overflow-hidden bg-black aspect-[9/16] max-h-72 mx-auto flex items-center justify-center border border-white/10">
+                  <video id="audit-video-player" controls playsinline class="w-full h-full object-contain"></video>
+                </div>
+
+                <!-- Video Specs Row -->
+                <div class="space-y-1.5 pt-1">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Tỷ lệ khung hình:</span>
+                    <span id="video-aspect-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">Đang phân tích...</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Thời lượng video:</span>
+                    <span id="video-duration-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300">--s</span>
+                  </div>
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Độ phân giải:</span>
+                    <span id="video-res-badge" class="text-[11px] font-mono text-cyan-400 font-bold">--</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: 6 Keyframes Filmstrip & Checklist -->
+              <div class="lg:col-span-7 space-y-3.5">
+                
+                <!-- Filmstrip Card -->
+                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span>🎞️ Dải 6 Khung Hình Đại Diện (Keyframes):</span>
+                    </span>
+                    <span class="text-[10px] text-cyan-400 font-mono">Bấm ảnh để tua video</span>
+                  </div>
+                  <div id="keyframe-filmstrip" class="keyframe-filmstrip custom-scrollbar">
+                    <!-- Keyframe canvas thumbnails injected dynamically -->
+                  </div>
+                  <p id="keyframe-status-text" class="text-[10px] text-slate-400 italic">
+                    Đang giải mã khung hình video...
+                  </p>
+                </div>
+
+                <!-- 5-Point Visual Checklist -->
+                <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-2.5">
+                  <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>Checklist 5 Tiêu Chuẩn Hình Ảnh Y Khoa TikTok:</span>
+                  </h4>
+                  <div id="visual-checklist-items" class="space-y-2">
+                    <!-- Injected dynamically -->
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Mandatory Disclaimer Copy Box -->
+            <div class="p-3.5 rounded-xl bg-slate-900/70 border border-white/10 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">📜</span>
+                <div>
+                  <span class="text-xs font-bold text-white">Nhãn Miễn trừ y khoa chuẩn bắt buộc (Disclaimer):</span>
+                  <p class="text-[11px] text-slate-400 font-mono mt-0.5">"Thông tin mang tính tham khảo chuyên môn. Người bệnh cần thăm khám trực tiếp cùng bác sĩ chuyên khoa để có phác đồ điều trị phù hợp."</p>
+                </div>
+              </div>
+              <button id="btn-copy-disclaimer" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-teal-300 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 transition-all whitespace-nowrap cursor-pointer shrink-0">
+                📋 Sao chép
+              </button>
+            </div>
+
+            <!-- Conversion Funnel: Lead Magnet Card -->
+            <div class="p-4 rounded-2xl bg-gradient-to-r from-teal-950/60 via-slate-900/80 to-cyan-950/60 border border-teal-500/40 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-teal-400 text-sm">🌟</span>
+                  <h4 class="text-xs md:text-sm font-extrabold text-white">Goodlife Media — MCN Đối Tác TikTok Trong Lĩnh Vực Y Khoa</h4>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-relaxed">
+                  Ekip Goodlife Media cung cấp đội ngũ quay phim, hậu kỳ chỉnh màu khử máu (Desaturation), che mờ bảo mật bệnh nhân và dựng video dọc 9:16 chuẩn y khoa.
+                </p>
+              </div>
+              <button class="btn-audit-cta-consult px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 hover:brightness-110 shadow-lg shadow-teal-500/30 whitespace-nowrap cursor-pointer transition-all shrink-0">
+                Nhận Tư Vấn Chiến Lược 1-on-1 ➔
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
 
   <!-- Consultation Modal Dialog -->
   <div id="modal-consultation" class="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
@@ -229,6 +495,7 @@
   <script src="js/dna-model.js"></script>
   <script src="js/building.js"></script>
   <script src="js/camera-controller.js"></script>
+  <script src="js/tiktok-audit-app.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

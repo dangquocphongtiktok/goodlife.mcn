@@ -750,6 +750,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       window.closeConsultationModal();
+      if (window.tiktokAuditApp) {
+        window.tiktokAuditApp.close();
+      }
       if (activeNodeIdx !== null) {
         closeOverview();
       }
