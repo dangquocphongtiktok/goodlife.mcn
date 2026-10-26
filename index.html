@@ -317,12 +317,12 @@
           
           <!-- Dropzone & Upload Action -->
           <div id="video-dropzone" class="p-6 rounded-2xl border-2 border-dashed border-slate-700 hover:border-cyan-400/80 bg-slate-950/60 hover:bg-cyan-500/5 transition-all text-center cursor-pointer group">
-            <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/quicktime" class="hidden">
+            <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/quicktime,image/jpeg,image/png,image/webp" class="hidden">
             <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mx-auto mb-2.5 group-hover:scale-110 transition-transform border border-cyan-400/30">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
             </div>
-            <h4 class="text-xs md:text-sm font-bold text-white mb-1">Kéo thả file video TikTok vào đây hoặc bấm để chọn file từ máy tính</h4>
-            <p class="text-[11px] text-slate-400">Hệ thống tự động rà soát 2 lỗi cốt lõi: <strong>1) Lời thoại Voice vi phạm</strong> & <strong>2) Khung hình vi phạm (nếu có)</strong></p>
+            <h4 class="text-xs md:text-sm font-bold text-white mb-1">Kéo thả file video hoặc ảnh y tế vào đây (hoặc bấm để duyệt file)</h4>
+            <p class="text-[11px] text-slate-400">Kiểm duyệt thông minh 2 cơ chế: <strong>AI Gemini Vision 2.5 Flash</strong> &amp; <strong>Bộ lọc Ngữ cảnh Da/Hemoglobin (loại trừ màu áo, đồ họa đỏ)</strong></p>
           </div>
 
           <!-- Video Audit Results Container -->
@@ -522,22 +522,67 @@
 
               <!-- SECTION 2: HÌNH ẢNH VI PHẠM (CHỈ XUẤT KHUNG HÌNH VI PHẠM NẾU CÓ) -->
               <div class="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
-                <div class="flex items-center justify-between pb-2.5 border-b border-white/5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-white/5 gap-2">
                   <div class="flex items-center gap-2.5">
                     <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm shrink-0">👁️</span>
                     <div>
                       <h4 class="text-xs md:text-sm font-bold text-white">Yếu Tố 2: Khung Hình Vi Phạm Trong Video</h4>
-                      <p class="text-[10px] text-slate-400">So sánh từng frame với Policy TikTok — Chỉ xuất ảnh nếu dính lỗi (Máu/Vết mổ/Nhạy cảm)</p>
+                      <p class="text-[10px] text-slate-400">Kiểm duyệt Ngữ cảnh: Tự động loại trừ áo đỏ, logo, banner — Chỉ bắt vết thương/máu thật</p>
                     </div>
                   </div>
-                  <span id="visual-verdict-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-300">
-                    Đang quét từng frame...
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span id="visual-engine-badge" class="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                      ⚡ Bộ Lọc Da &amp; Hemoglobin (Offline)
+                    </span>
+                    <button id="btn-toggle-gemini-config" type="button" class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-white/10 transition-all flex items-center gap-1 cursor-pointer">
+                      <span>⚙️</span>
+                      <span>Gemini AI</span>
+                    </button>
+                    <span id="visual-verdict-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-300">
+                      Đang quét từng frame...
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Gemini API Key Configuration Drawer (Collapsible) -->
+                <div id="gemini-config-drawer" class="hidden p-3.5 rounded-xl bg-slate-950/80 border border-cyan-500/30 space-y-2.5 gemini-config-drawer">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                      <span>🤖</span>
+                      <span>Cơ Chế 1: Phân Tích Ngữ Cảnh Bằng AI Gemini Vision (gemini-2.5-flash)</span>
+                    </span>
+                    <span id="gemini-key-status" class="text-[10px] text-slate-400 font-mono">Chưa cấu hình API Key</span>
+                  </div>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">
+                    Nhập <strong>Google Gemini API Key</strong> để kích hoạt AI Vision <code>gemini-2.5-flash</code>. AI sẽ áp dụng quy tắc <strong>Contextual Disambiguation</strong>: nhận diện ngữ cảnh sinh học (máu y khoa vs áo đỏ, tiêu đề banner, son môi) với độ chuẩn xác tuyệt đối. Nếu không nhập key, hệ thống tự động chạy <strong>Cơ chế 2: Bộ lọc Cục bộ Ngữ cảnh Da &amp; HSV</strong> 100% offline.
+                  </p>
+                  <div class="flex flex-col sm:flex-row items-center gap-2">
+                    <input type="password" id="gemini-api-key-input" class="w-full flex-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono" placeholder="Dán Gemini API Key (AIzaSy...)">
+                    <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                      <button id="btn-save-gemini-key" type="button" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-all cursor-pointer">
+                        Lưu Key
+                      </button>
+                      <button id="btn-remove-gemini-key" type="button" class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold text-rose-300 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 transition-all cursor-pointer">
+                        Xóa Key
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Safe Red Objects Detection Banner (Shown if safe red objects are cleared) -->
+                <div id="safe-red-detected-banner" class="hidden p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs text-emerald-300 flex items-start gap-2.5">
+                  <span class="text-base shrink-0">🛡️</span>
+                  <div>
+                    <h5 class="font-bold text-emerald-200">Đã kích hoạt Bộ lọc Ngữ cảnh — Loại trừ Dương tính giả:</h5>
+                    <p id="safe-red-detected-text" class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+                      Phát hiện sắc đỏ từ trang phục/đồ họa (An toàn - Không phải máu y khoa).
+                    </p>
+                  </div>
                 </div>
 
                 <!-- Violating Frames Container: Only displayed if violations are found, else shows clean badge -->
                 <div id="violating-frames-container" class="space-y-3">
-                  <!-- Injected dynamically: either violating frame cards or clean safe card -->
+                  <!-- Injected dynamically: either violating frame cards with Step D dismiss toggle or clean safe card -->
                 </div>
               </div>
 

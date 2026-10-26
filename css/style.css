@@ -433,6 +433,8 @@ h1, h2, h3, h4, h5, .font-heading {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 236px;
+  box-sizing: border-box;
   padding: 6px 18px 6px 6px;
   border-radius: 9999px;
   background: rgba(4, 20, 42, 0.88);
@@ -586,6 +588,8 @@ h1, h2, h3, h4, h5, .font-heading {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 236px;
+  box-sizing: border-box;
   padding: 6px 18px 6px 6px;
   border-radius: 9999px;
   background: rgba(4, 20, 42, 0.9);
@@ -681,6 +685,7 @@ h1, h2, h3, h4, h5, .font-heading {
     display: none;
   }
   .tiktok-pill-content {
+    width: auto;
     padding: 4px;
     gap: 0;
   }
@@ -692,6 +697,7 @@ h1, h2, h3, h4, h5, .font-heading {
     display: none;
   }
   .zalo-pill-content {
+    width: auto;
     padding: 4px;
     gap: 0;
   }
@@ -890,5 +896,36 @@ h1, h2, h3, h4, h5, .font-heading {
   0% { transform: scaleY(0.25); opacity: 0.4; }
   100% { transform: scaleY(1); opacity: 1; }
 }
+
+/* Gemini AI Vision & Heuristic Moderation Engine Styles */
+.engine-badge-gemini {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(56, 189, 248, 0.2));
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  color: #c084fc;
+}
+
+.engine-badge-offline {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+
+.gemini-config-drawer {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-frame-dismiss {
+  transition: all 0.2s ease;
+}
+
+.btn-frame-dismiss:hover {
+  transform: translateY(-1px);
+}
+
+.frame-card-dismissed {
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  background-color: rgba(6, 78, 59, 0.15) !important;
+}
+
 
 
