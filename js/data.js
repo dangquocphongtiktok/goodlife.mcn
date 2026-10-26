@@ -18,7 +18,7 @@ const NODES_DATA = [
     nodeLabel: "04. FAQ",
     buildingLabel: "04. FAQ",
     subtitle: "Giải đáp minh bạch pháp lý, chi phí VAT 8%, lịch quay tối ưu & đăng ký tư vấn trực tiếp",
-    tagline: "Vành Đai Bảo Mật • Pháp Lý & Hợp Tác Y Tế",
+    tagline: "FAQ",
     accentColor: "#10B981", // Emerald
     accentHex: 0x10b981,
     cameraTarget: { y: -2.4, zoom: 6.2, shiftX: -1.7 },
@@ -183,7 +183,7 @@ const NODES_DATA = [
     nodeLabel: "03. Sensory Design",
     buildingLabel: "03. Sensory Design",
     subtitle: "Thiết kế Ánh sáng, Mùi hương, Âm thanh & Phần nhìn — Xóa bỏ căng thẳng khi đi khám",
-    tagline: "Lăng Kính Cảm Xúc • Kiến Trúc Giác Quan Y Sinh",
+    tagline: "SENSORY DESIGN",
     accentColor: "#F59E0B", // Amber Gold
     accentHex: 0xf59e0b,
     cameraTarget: { y: -0.8, zoom: 6.2, shiftX: -1.7 },
@@ -391,7 +391,7 @@ const NODES_DATA = [
     nodeLabel: "02. Dịch Vụ & Bảng Giá",
     buildingLabel: "02. Dịch Vụ & Bảng Giá",
     subtitle: "3 Tab: Gói Video Trọn Gói • Các Gói Dịch Vụ Riêng Biệt (Tùy Chọn) • Dịch Vụ Mở Rộng",
-    tagline: "Thấu Kính Media • Sản Xuất & Tăng Trưởng",
+    tagline: "DỊCH VỤ & BÁO GIÁ",
     accentColor: "#00A896", // Teal
     accentHex: 0x00a896,
     cameraTarget: { y: 0.8, zoom: 6.2, shiftX: -1.7 },
@@ -713,7 +713,7 @@ const NODES_DATA = [
     nodeLabel: "01. Giới Thiệu",
     buildingLabel: "01. Giới Thiệu",
     subtitle: "Đơn vị truyền thông & marketing chuyên biệt mảng Y khoa – Chăm sóc sức khỏe tại TP.HCM",
-    tagline: "Lõi Pha Lê Trung Tâm • Tầm Nhìn Chiến Lược Y Khoa",
+    tagline: "GIỚI THIỆU",
     accentColor: "#38BDF8", // Cyan
     accentHex: 0x38bdf8,
     cameraTarget: { y: 2.5, zoom: 6.2, shiftX: -1.7 },
