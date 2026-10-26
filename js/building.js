@@ -47,6 +47,12 @@ class BuildingScene {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.2;
 
+    this.renderer.domElement.setAttribute('role', 'img');
+    this.renderer.domElement.setAttribute(
+      'aria-label',
+      'Mô hình 3D tương tác kiến trúc xoắn ốc DNA đại diện cho 4 trụ cột truyền thông y khoa: Giới thiệu Goodlife Media, Dịch vụ xây kênh TikTok bác sĩ và phòng khám, Sensory Design thiết kế phòng khám và FAQ.'
+    );
+
     this.container.appendChild(this.renderer.domElement);
   }
 

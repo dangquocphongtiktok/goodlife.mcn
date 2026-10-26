@@ -1,0 +1,6 @@
+# Goodlife Media - robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://goodlifemedia.vn/sitemap.xml

@@ -277,15 +277,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Highlight node
     buildingScene.setHoverFloor(nodeIdx);
 
-    // Populate Side Drawer Content
+    // Populate Side Drawer Header Info
     panelTag.textContent = data.tagline;
     panelTag.style.color = data.accentColor;
     panelTitle.textContent = data.title;
     panelSubtitle.textContent = data.subtitle;
-    panelBody.innerHTML = data.content;
 
-    // Initialize interactive components inside panel
-    initPanelInteractions(nodeIdx);
+    // Toggle corresponding pre-rendered section in DOM
+    const sections = panelBody.querySelectorAll('.panel-section');
+    sections.forEach(sec => {
+      const secNode = parseInt(sec.getAttribute('data-node'), 10);
+      if (secNode === nodeIdx) {
+        sec.classList.remove('hidden');
+      } else {
+        sec.classList.add('hidden');
+      }
+    });
+
+    // Ensure interactive components inside panel are initialized
+    initAllPanelInteractions();
 
     // Open Side Drawer
     sidePanel.classList.add('open');
@@ -306,350 +316,367 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Hook up interactive behaviors inside the panels
+  let panelsInitialized = false;
+  function initAllPanelInteractions() {
+    if (panelsInitialized) return;
+    panelsInitialized = true;
+    initPricingPanel();
+    initSensoryPanel();
+    initFAQPanel();
+  }
+
+  // Backward compatibility alias
   function initPanelInteractions(nodeIdx) {
-    // 1. Panel 02: Dịch Vụ & Báo Giá (nodeIdx === 2)
-    if (nodeIdx === 2) {
-      const tabBtns = panelBody.querySelectorAll('.pricing-tab-btn');
-      const tabPanes = panelBody.querySelectorAll('.pricing-tab-pane');
+    initAllPanelInteractions();
+  }
 
-      tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const targetTabId = btn.getAttribute('data-tab');
-          tabBtns.forEach(b => {
-            b.classList.remove('active');
-            b.classList.add('text-slate-400');
-            b.classList.remove('text-teal-300', 'bg-teal-500/20', 'border-teal-500/40');
-          });
-          btn.classList.add('active');
-          btn.classList.remove('text-slate-400');
-          btn.classList.add('text-teal-300', 'bg-teal-500/20', 'border-teal-500/40');
+  // 1. Panel 02: Dịch Vụ & Báo Giá
+  function initPricingPanel() {
+    const tabBtns = panelBody.querySelectorAll('.pricing-tab-btn');
+    const tabPanes = panelBody.querySelectorAll('.pricing-tab-pane');
 
-          tabPanes.forEach(pane => {
-            if (pane.id === targetTabId) {
-              pane.classList.remove('hidden');
-            } else {
-              pane.classList.add('hidden');
-            }
-          });
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTabId = btn.getAttribute('data-tab');
+        tabBtns.forEach(b => {
+          b.classList.remove('active');
+          b.classList.add('text-slate-400');
+          b.classList.remove('text-teal-300', 'bg-teal-500/20', 'border-teal-500/40');
         });
-      });
+        btn.classList.add('active');
+        btn.classList.remove('text-slate-400');
+        btn.classList.add('text-teal-300', 'bg-teal-500/20', 'border-teal-500/40');
 
-      // Price Calculator Checkboxes
-      const checkboxes = panelBody.querySelectorAll('.service-checkbox');
-      const totalPriceEl = panelBody.querySelector('#custom-total-price');
-      const countBadgeEl = panelBody.querySelector('#selected-count-badge');
-
-      function recalculatePrice() {
-        let total = 0;
-        let count = 0;
-        checkboxes.forEach(cb => {
-          if (cb.checked) {
-            total += parseInt(cb.getAttribute('data-price') || '0', 10);
-            count++;
-          }
-        });
-
-        if (totalPriceEl) {
-          totalPriceEl.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
-        }
-        if (countBadgeEl) {
-          countBadgeEl.textContent = `${count} gói đã chọn`;
-        }
-      }
-
-      checkboxes.forEach(cb => {
-        cb.addEventListener('change', recalculatePrice);
-      });
-
-      // ================= Quản lý số buổi quay hình (Shooting Sessions Stepper) =================
-      let quaySessions = 1;
-      const baseShootingPrice = 2500000;
-      const cbQuayHinh = panelBody.querySelector('#cb-quay-hinh');
-      const btnDecQuay = panelBody.querySelector('#btn-dec-quay');
-      const btnIncQuay = panelBody.querySelector('#btn-inc-quay');
-      const quayCountEl = panelBody.querySelector('#quay-sessions-count');
-      const quaySubtotalEl = panelBody.querySelector('#quay-hinh-subtotal');
-      const presetBtns = panelBody.querySelectorAll('.btn-preset-quay');
-
-      function updateQuaySessions(count, autoCheck = true) {
-        quaySessions = Math.max(1, Math.min(20, count));
-        if (quayCountEl) quayCountEl.textContent = quaySessions;
-
-        const subtotal = quaySessions * baseShootingPrice;
-        if (quaySubtotalEl) {
-          quaySubtotalEl.textContent = (quaySessions > 1 ? `${subtotal.toLocaleString('vi-VN')} đ (${quaySessions} buổi)` : '2.500.000 đ/buổi');
-        }
-
-        if (cbQuayHinh) {
-          cbQuayHinh.setAttribute('data-price', subtotal);
-          cbQuayHinh.setAttribute('data-name', `Quay hình & Di chuyển (${quaySessions} buổi)`);
-          if (autoCheck && !cbQuayHinh.checked) {
-            cbQuayHinh.checked = true;
-          }
-        }
-
-        // Highlight active preset
-        presetBtns.forEach(p => {
-          const s = parseInt(p.getAttribute('data-sessions') || '1', 10);
-          if (s === quaySessions) {
-            p.classList.add('bg-teal-500/25', 'text-teal-300', 'border-teal-500/50');
-            p.classList.remove('bg-slate-800', 'text-slate-300');
+        tabPanes.forEach(pane => {
+          if (pane.id === targetTabId) {
+            pane.classList.remove('hidden');
           } else {
-            p.classList.remove('bg-teal-500/25', 'text-teal-300', 'border-teal-500/50');
-            p.classList.add('bg-slate-800', 'text-slate-300');
+            pane.classList.add('hidden');
           }
         });
+      });
+    });
 
-        recalculatePrice();
+    // Price Calculator Checkboxes
+    const checkboxes = panelBody.querySelectorAll('.service-checkbox');
+    const totalPriceEl = panelBody.querySelector('#custom-total-price');
+    const countBadgeEl = panelBody.querySelector('#selected-count-badge');
+
+    function recalculatePrice() {
+      let total = 0;
+      let count = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          total += parseInt(cb.getAttribute('data-price') || '0', 10);
+          count++;
+        }
+      });
+
+      if (totalPriceEl) {
+        totalPriceEl.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+      }
+      if (countBadgeEl) {
+        countBadgeEl.textContent = `${count} gói đã chọn`;
+      }
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', recalculatePrice);
+    });
+
+    // Quản lý số buổi quay hình (Shooting Sessions Stepper)
+    let quaySessions = 1;
+    const baseShootingPrice = 2500000;
+    const cbQuayHinh = panelBody.querySelector('#cb-quay-hinh');
+    const btnDecQuay = panelBody.querySelector('#btn-dec-quay');
+    const btnIncQuay = panelBody.querySelector('#btn-inc-quay');
+    const quayCountEl = panelBody.querySelector('#quay-sessions-count');
+    const quaySubtotalEl = panelBody.querySelector('#quay-hinh-subtotal');
+    const presetBtns = panelBody.querySelectorAll('.btn-preset-quay');
+
+    function updateQuaySessions(count, autoCheck = true) {
+      quaySessions = Math.max(1, Math.min(20, count));
+      if (quayCountEl) quayCountEl.textContent = quaySessions;
+
+      const subtotal = quaySessions * baseShootingPrice;
+      if (quaySubtotalEl) {
+        quaySubtotalEl.textContent = (quaySessions > 1 ? `${subtotal.toLocaleString('vi-VN')} đ (${quaySessions} buổi)` : '2.500.000 đ/buổi');
       }
 
-      if (btnDecQuay) {
-        btnDecQuay.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          updateQuaySessions(quaySessions - 1);
-        });
+      if (cbQuayHinh) {
+        cbQuayHinh.setAttribute('data-price', subtotal);
+        cbQuayHinh.setAttribute('data-name', `Quay hình & Di chuyển (${quaySessions} buổi)`);
+        if (autoCheck && !cbQuayHinh.checked) {
+          cbQuayHinh.checked = true;
+        }
       }
 
-      if (btnIncQuay) {
-        btnIncQuay.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          updateQuaySessions(quaySessions + 1);
-        });
-      }
-
+      // Highlight active preset
       presetBtns.forEach(p => {
-        p.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const s = parseInt(p.getAttribute('data-sessions') || '1', 10);
-          updateQuaySessions(s);
-        });
+        const s = parseInt(p.getAttribute('data-sessions') || '1', 10);
+        if (s === quaySessions) {
+          p.classList.add('bg-teal-500/25', 'text-teal-300', 'border-teal-500/50');
+          p.classList.remove('bg-slate-800', 'text-slate-300');
+        } else {
+          p.classList.remove('bg-teal-500/25', 'text-teal-300', 'border-teal-500/50');
+          p.classList.add('bg-slate-800', 'text-slate-300');
+        }
       });
 
-      window.requestCustomSelection = function() {
-        const selected = [];
-        let total = 0;
-        checkboxes.forEach(cb => {
-          if (cb.checked) {
-            selected.push(cb.getAttribute('data-name'));
-            total += parseInt(cb.getAttribute('data-price') || '0', 10);
-          }
-        });
-
-        if (selected.length === 0) {
-          alert('Vui lòng tích chọn ít nhất 1 gói dịch vụ để nhận báo giá chi tiết!');
-          return;
-        }
-
-        window.__customQuoteDetails = {
-          items: selected,
-          total: total.toLocaleString('vi-VN') + ' VNĐ'
-        };
-
-        window.openConsultationModal();
-        const selectDropdown = document.querySelector('#modal-consultation select');
-        if (selectDropdown) {
-          selectDropdown.value = 'Gói Dịch Vụ Riêng Lẻ (Kịch bản, Quay, Dựng, SEO)';
-        }
-      };
-
-      window.openConsultationModalWithService = function(serviceName) {
-        window.openConsultationModal();
-        const selectDropdown = document.querySelector('#modal-consultation select');
-        if (selectDropdown) {
-          if (serviceName.includes('25')) {
-            selectDropdown.value = 'Gói Truyền Thông Trọn Gói 25 triệu/tháng (30 video + MCN + Ads)';
-          } else if (serviceName.includes('15')) {
-            selectDropdown.value = 'Gói Truyền Thông Tiêu Chuẩn 15 triệu/tháng (30 video + MCN)';
-          }
-        }
-      };
+      recalculatePrice();
     }
 
-    // 2. Panel 03: Sensory Design (nodeIdx === 1)
-    if (nodeIdx === 1) {
-      const rangeSlider = panelBody.querySelector('#sensory-range-slider');
-      const layerBefore = panelBody.querySelector('#sensory-layer-before');
-      const sliderHandle = panelBody.querySelector('#sensory-slider-handle');
-      const dividerLine = panelBody.querySelector('#sensory-divider-line');
-      const visualizer = panelBody.querySelector('#sensory-visualizer');
+    if (btnDecQuay) {
+      btnDecQuay.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        updateQuaySessions(quaySessions - 1);
+      });
+    }
 
-      function updateSensorySlider(val) {
-        const pct = Math.max(0, Math.min(100, parseFloat(val)));
-        if (layerBefore) {
-          layerBefore.style.clipPath = `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`;
-          layerBefore.style.webkitClipPath = `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`;
+    if (btnIncQuay) {
+      btnIncQuay.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        updateQuaySessions(quaySessions + 1);
+      });
+    }
+
+    presetBtns.forEach(p => {
+      p.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const s = parseInt(p.getAttribute('data-sessions') || '1', 10);
+        updateQuaySessions(s);
+      });
+    });
+
+    window.requestCustomSelection = function() {
+      const selected = [];
+      let total = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          selected.push(cb.getAttribute('data-name'));
+          total += parseInt(cb.getAttribute('data-price') || '0', 10);
         }
-        if (sliderHandle) {
-          sliderHandle.style.left = `${pct}%`;
-        }
-        if (dividerLine) {
-          dividerLine.style.left = `${pct}%`;
-        }
+      });
+
+      if (selected.length === 0) {
+        alert('Vui lòng tích chọn ít nhất 1 gói dịch vụ để nhận báo giá chi tiết!');
+        return;
       }
 
-      if (rangeSlider) {
-        rangeSlider.addEventListener('input', (e) => {
-          updateSensorySlider(e.target.value);
-        });
-        rangeSlider.addEventListener('change', (e) => {
-          updateSensorySlider(e.target.value);
-        });
+      window.__customQuoteDetails = {
+        items: selected,
+        total: total.toLocaleString('vi-VN') + ' VNĐ'
+      };
+
+      window.openConsultationModal();
+      const selectDropdown = document.querySelector('#modal-consultation select');
+      if (selectDropdown) {
+        selectDropdown.value = 'Gói Dịch Vụ Riêng Lẻ (Kịch bản, Quay, Dựng, SEO)';
       }
+    };
 
-      // Smooth pointer drag directly on the visualizer frame
-      if (visualizer && rangeSlider) {
-        let isDragging = false;
-        const setPosFromPointer = (clientX) => {
-          const rect = visualizer.getBoundingClientRect();
-          const x = clientX - rect.left;
-          const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
-          rangeSlider.value = pct;
-          updateSensorySlider(pct);
-        };
+    window.openConsultationModalWithService = function(serviceName) {
+      window.openConsultationModal();
+      const selectDropdown = document.querySelector('#modal-consultation select');
+      if (selectDropdown) {
+        if (serviceName.includes('25')) {
+          selectDropdown.value = 'Gói Truyền Thông Trọn Gói 25 triệu/tháng (30 video + MCN + Ads)';
+        } else if (serviceName.includes('15')) {
+          selectDropdown.value = 'Gói Truyền Thông Tiêu Chuẩn 15 triệu/tháng (30 video + MCN)';
+        }
+      }
+    };
+  }
 
-        visualizer.addEventListener('pointerdown', (e) => {
-          isDragging = true;
+  // 2. Panel 03: Sensory Design
+  function initSensoryPanel() {
+    const rangeSlider = panelBody.querySelector('#sensory-range-slider');
+    const layerBefore = panelBody.querySelector('#sensory-layer-before');
+    const sliderHandle = panelBody.querySelector('#sensory-slider-handle');
+    const dividerLine = panelBody.querySelector('#sensory-divider-line');
+    const visualizer = panelBody.querySelector('#sensory-visualizer');
+
+    function updateSensorySlider(val) {
+      const pct = Math.max(0, Math.min(100, parseFloat(val)));
+      if (layerBefore) {
+        layerBefore.style.clipPath = `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`;
+        layerBefore.style.webkitClipPath = `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`;
+      }
+      if (sliderHandle) {
+        sliderHandle.style.left = `${pct}%`;
+      }
+      if (dividerLine) {
+        dividerLine.style.left = `${pct}%`;
+      }
+    }
+
+    if (rangeSlider) {
+      rangeSlider.addEventListener('input', (e) => {
+        updateSensorySlider(e.target.value);
+      });
+      rangeSlider.addEventListener('change', (e) => {
+        updateSensorySlider(e.target.value);
+      });
+    }
+
+    // Smooth pointer drag directly on the visualizer frame
+    if (visualizer && rangeSlider) {
+      let isDragging = false;
+      const setPosFromPointer = (clientX) => {
+        const rect = visualizer.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        rangeSlider.value = pct;
+        updateSensorySlider(pct);
+      };
+
+      visualizer.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        setPosFromPointer(e.clientX);
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (isDragging) {
           setPosFromPointer(e.clientX);
-        });
-
-        window.addEventListener('pointermove', (e) => {
-          if (isDragging) {
-            setPosFromPointer(e.clientX);
-          }
-        });
-
-        window.addEventListener('pointerup', () => {
-          isDragging = false;
-        });
-      }
-
-      // Sensory 4 Mode Data
-      const SENSORY_MODES = {
-        light: {
-          label: "Trục Ánh Sáng: Phòng Chờ Trước vs Sau Thiết Kế",
-          before: {
-            title: "Ánh Sáng Trắng Gay Gắt",
-            desc: "Đèn tuýp huỳnh quang 6500K chiếu thẳng trần thả, gây lóa mắt và căng thẳng cho bệnh nhân ngồi chờ thăm khám.",
-            spec: "Huỳnh quang 6500K"
-          },
-          after: {
-            title: "Ánh Sáng Sinh Học Tự Nhiên",
-            desc: "Tái tạo chu kỳ bình minh – hoàng hôn (2700K - 4000K) hắt trần gián tiếp, làm dịu võng mạc và giảm 38% hormone căng thẳng cortisol.",
-            spec: "Circadian 2700K - 4000K"
-          }
-        },
-        scent: {
-          label: "Trục Mùi Hương: Phòng Chờ Trước vs Sau Thiết Kế",
-          before: {
-            title: "Mùi Cồn & Thuốc Sát Trùng Nồng Nặc",
-            desc: "Mùi hóa chất y tế xộc vào ngay tại sảnh phòng chờ tạo cảm giác ớn lạnh, sợ đau đớn và căng thẳng tâm lý.",
-            spec: "Mùi cồn & hóa chất"
-          },
-          after: {
-            title: "Hương Thảo Mộc Y Học Thư Giãn",
-            desc: "Khuếch tán vi hạt tinh dầu tràm trà & oải hương chuẩn dược điển tại sảnh chờ, vừa khử khuẩn không khí 99% vừa tạo cảm giác thư thái như Spa 5 sao.",
-            spec: "Dược liệu tự nhiên"
-          }
-        },
-        sound: {
-          label: "Trục Âm Thanh: Phòng Chờ Trước vs Sau Thiết Kế",
-          before: {
-            title: "Tiếng Ồn Dội Sàn & Căng Thẳng",
-            desc: "Tiếng bước chân dội sàn gạch men, tiếng gọi loa ồn ã và tạp âm vọng từ phòng thủ thuật gây bồn chồn cho người ngồi đợi.",
-            spec: "Tiếng ồn 70 - 80 dBA"
-          },
-          after: {
-            title: "Tần Số Âm Học Thư Thái 432Hz",
-            desc: "Vách gỗ uốn lượn tiêu âm cao cấp kết hợp nhạc y học không lời tần số 432Hz/528Hz giúp nhịp tim ổn định và xoa dịu sóng não lo âu.",
-            spec: "Âm học 432Hz < 40 dBA"
-          }
-        },
-        visual: {
-          label: "Trục Phần Nhìn: Phòng Chờ Trước vs Sau Thiết Kế",
-          before: {
-            title: "Ghế Chờ Kim Loại & Vách Kính Cách Biệt",
-            desc: "Hàng ghế chờ kim loại lạnh lẽo, quầy tiếp đón vách kính ngăn cách tạo cảm giác xa cách, nặng nề không khí bệnh viện.",
-            spec: "Ghế kim loại & vách kính"
-          },
-          after: {
-            title: "Kiến Trúc Sinh Học (Biophilic)",
-            desc: "Sofa nỉ boucle hữu cơ bo tròn mềm mại, quầy lễ tân mở thân thiện, vách gỗ ấm và mảng xanh thiên nhiên giúp bệnh nhân an lòng.",
-            spec: "Sofa hữu cơ & Cây xanh"
-          }
         }
-      };
+      });
 
-      const sensoryBtns = panelBody.querySelectorAll('.sensory-btn');
-      const currentLabelEl = panelBody.querySelector('#sensory-current-label');
-      const titleBefore = panelBody.querySelector('#sensory-title-before');
-      const descBefore = panelBody.querySelector('#sensory-desc-before');
-      const specBefore = panelBody.querySelector('#sensory-spec-before');
-      const titleAfter = panelBody.querySelector('#sensory-title-after');
-      const descAfter = panelBody.querySelector('#sensory-desc-after');
-      const specAfter = panelBody.querySelector('#sensory-spec-after');
-
-      sensoryBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const modeKey = btn.getAttribute('data-mode');
-          const data = SENSORY_MODES[modeKey];
-          if (!data) return;
-
-          sensoryBtns.forEach(b => {
-            b.classList.remove('active');
-            b.classList.remove('bg-amber-500/20', 'border-amber-500/60', 'text-amber-300');
-            b.classList.add('bg-slate-900/60', 'border-slate-700/60', 'text-slate-300');
-          });
-
-          btn.classList.add('active');
-          btn.classList.remove('bg-slate-900/60', 'border-slate-700/60', 'text-slate-300');
-          btn.classList.add('bg-amber-500/20', 'border-amber-500/60', 'text-amber-300');
-
-          if (currentLabelEl) currentLabelEl.textContent = data.label;
-          if (titleBefore) titleBefore.textContent = data.before.title;
-          if (descBefore) descBefore.textContent = data.before.desc;
-          if (specBefore) specBefore.textContent = data.before.spec;
-          if (titleAfter) titleAfter.textContent = data.after.title;
-          if (descAfter) descAfter.textContent = data.after.desc;
-          if (specAfter) specAfter.textContent = data.after.spec;
-        });
+      window.addEventListener('pointerup', () => {
+        isDragging = false;
       });
     }
 
-    // 3. Panel 04: FAQ & Đặt Lịch (nodeIdx === 0)
-    if (nodeIdx === 0) {
-      const faqItems = panelBody.querySelectorAll('.faq-item');
-      faqItems.forEach(item => {
-        const toggleBtn = item.querySelector('.faq-toggle');
-        const contentEl = item.querySelector('.faq-content');
-
-        toggleBtn.addEventListener('click', () => {
-          const isOpen = item.classList.contains('open');
-          // Close all others
-          faqItems.forEach(i => {
-            i.classList.remove('open');
-            i.querySelector('.faq-content').classList.add('hidden');
-          });
-
-          if (!isOpen) {
-            item.classList.add('open');
-            contentEl.classList.remove('hidden');
-          }
-        });
-      });
-
-      // Inline form submit to Email goodlife.mcn@gmail.com
-      const inlineForm = panelBody.querySelector('#inline-consult-form');
-      if (inlineForm) {
-        inlineForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const submitBtn = inlineForm.querySelector('button[type="submit"]');
-          const originalText = submitBtn.innerHTML;
-          sendConsultationToEmail(inlineForm, submitBtn, originalText);
-        });
+    // Sensory 4 Mode Data
+    const SENSORY_MODES = {
+      light: {
+        label: "Trục Ánh Sáng: Phòng Chờ Trước vs Sau Thiết Kế",
+        before: {
+          title: "Ánh Sáng Trắng Gay Gắt",
+          desc: "Đèn tuýp huỳnh quang 6500K chiếu thẳng trần thả, gây lóa mắt và căng thẳng cho bệnh nhân ngồi chờ thăm khám.",
+          spec: "Huỳnh quang 6500K"
+        },
+        after: {
+          title: "Ánh Sáng Sinh Học Tự Nhiên",
+          desc: "Tái tạo chu kỳ bình minh – hoàng hôn (2700K - 4000K) hắt trần gián tiếp, làm dịu võng mạc và giảm 38% hormone căng thẳng cortisol.",
+          spec: "Circadian 2700K - 4000K"
+        }
+      },
+      scent: {
+        label: "Trục Mùi Hương: Phòng Chờ Trước vs Sau Thiết Kế",
+        before: {
+          title: "Mùi Cồn & Thuốc Sát Trùng Nồng Nặc",
+          desc: "Mùi hóa chất y tế xộc vào ngay tại sảnh phòng chờ tạo cảm giác ớn lạnh, sợ đau đớn và căng thẳng tâm lý.",
+          spec: "Mùi cồn & hóa chất"
+        },
+        after: {
+          title: "Hương Thảo Mộc Y Học Thư Giãn",
+          desc: "Khuếch tán vi hạt tinh dầu tràm trà & oải hương chuẩn dược điển tại sảnh chờ, vừa khử khuẩn không khí 99% vừa tạo cảm giác thư thái như Spa 5 sao.",
+          spec: "Dược liệu tự nhiên"
+        }
+      },
+      sound: {
+        label: "Trục Âm Thanh: Phòng Chờ Trước vs Sau Thiết Kế",
+        before: {
+          title: "Tiếng Ồn Dội Sàn & Căng Thẳng",
+          desc: "Tiếng bước chân dội sàn gạch men, tiếng gọi loa ồn ã và tạp âm vọng từ phòng thủ thuật gây bồn chồn cho người ngồi đợi.",
+          spec: "Tiếng ồn 70 - 80 dBA"
+        },
+        after: {
+          title: "Tần Số Âm Học Thư Thái 432Hz",
+          desc: "Vách gỗ uốn lượn tiêu âm cao cấp kết hợp nhạc y học không lời tần số 432Hz/528Hz giúp nhịp tim ổn định và xoa dịu sóng não lo âu.",
+          spec: "Âm học 432Hz < 40 dBA"
+        }
+      },
+      visual: {
+        label: "Trục Phần Nhìn: Phòng Chờ Trước vs Sau Thiết Kế",
+        before: {
+          title: "Ghế Chờ Kim Loại & Vách Kính Cách Biệt",
+          desc: "Hàng ghế chờ kim loại lạnh lẽo, quầy tiếp đón vách kính ngăn cách tạo cảm giác xa cách, nặng nề không khí bệnh viện.",
+          spec: "Ghế kim loại & vách kính"
+        },
+        after: {
+          title: "Kiến Trúc Sinh Học (Biophilic)",
+          desc: "Sofa nỉ boucle hữu cơ bo tròn mềm mại, quầy lễ tân mở thân thiện, vách gỗ ấm và mảng xanh thiên nhiên giúp bệnh nhân an lòng.",
+          spec: "Sofa hữu cơ & Cây xanh"
+        }
       }
+    };
+
+    const sensoryBtns = panelBody.querySelectorAll('.sensory-btn');
+    const currentLabelEl = panelBody.querySelector('#sensory-current-label');
+    const titleBefore = panelBody.querySelector('#sensory-title-before');
+    const descBefore = panelBody.querySelector('#sensory-desc-before');
+    const specBefore = panelBody.querySelector('#sensory-spec-before');
+    const titleAfter = panelBody.querySelector('#sensory-title-after');
+    const descAfter = panelBody.querySelector('#sensory-desc-after');
+    const specAfter = panelBody.querySelector('#sensory-spec-after');
+
+    sensoryBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modeKey = btn.getAttribute('data-mode');
+        const data = SENSORY_MODES[modeKey];
+        if (!data) return;
+
+        sensoryBtns.forEach(b => {
+          b.classList.remove('active');
+          b.classList.remove('bg-amber-500/20', 'border-amber-500/60', 'text-amber-300');
+          b.classList.add('bg-slate-900/60', 'border-slate-700/60', 'text-slate-300');
+        });
+
+        btn.classList.add('active');
+        btn.classList.remove('bg-slate-900/60', 'border-slate-700/60', 'text-slate-300');
+        btn.classList.add('bg-amber-500/20', 'border-amber-500/60', 'text-amber-300');
+
+        if (currentLabelEl) currentLabelEl.textContent = data.label;
+        if (titleBefore) titleBefore.textContent = data.before.title;
+        if (descBefore) descBefore.textContent = data.before.desc;
+        if (specBefore) specBefore.textContent = data.before.spec;
+        if (titleAfter) titleAfter.textContent = data.after.title;
+        if (descAfter) descAfter.textContent = data.after.desc;
+        if (specAfter) specAfter.textContent = data.after.spec;
+      });
+    });
+  }
+
+  // 3. Panel 04: FAQ & Đặt Lịch
+  function initFAQPanel() {
+    const faqItems = panelBody.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+      const toggleBtn = item.querySelector('.faq-toggle');
+      const contentEl = item.querySelector('.faq-content');
+
+      if (!toggleBtn) return;
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        // Close all others
+        faqItems.forEach(i => {
+          i.classList.remove('open');
+          const c = i.querySelector('.faq-content');
+          if (c) c.classList.add('hidden');
+          const t = i.querySelector('.faq-toggle');
+          if (t) t.setAttribute('aria-expanded', 'false');
+        });
+
+        if (!isOpen) {
+          item.classList.add('open');
+          if (contentEl) contentEl.classList.remove('hidden');
+          toggleBtn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    // Inline form submit to Email goodlife.mcn@gmail.com
+    const inlineForm = panelBody.querySelector('#inline-consult-form');
+    if (inlineForm) {
+      inlineForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const submitBtn = inlineForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        sendConsultationToEmail(inlineForm, submitBtn, originalText);
+      });
     }
   }
 
@@ -770,7 +797,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 10. Remove Preloader
+  // 10. Pre-initialize all panel interactive controls
+  initAllPanelInteractions();
+
+  // 11. Remove Preloader
   setTimeout(() => {
     preloader.classList.add('fade-out');
     setTimeout(() => {

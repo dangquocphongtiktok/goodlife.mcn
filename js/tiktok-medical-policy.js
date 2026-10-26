@@ -137,7 +137,7 @@ const TIKTOK_MEDICAL_POLICY = {
     {
       id: "blood_open_wounds",
       name: "Lỗi 1: Máu & Vết thương hở (Graphic Blood & Open Wounds)",
-      description: "Khung hình xuất hiện màu đỏ tươi của máu, gạc thấm máu, vết mổ hở hoặc dịch cơ thể đang chảy.",
+      description: "Dấu hiệu máu sinh học thật trên da/mô người, vết thương hở ngoại khoa hoặc rỉ máu mô cơ thể (loại trừ màu đỏ đồ họa, trang phục y tế, logo, chữ viết).",
       riskLevel: "Rất cao",
       algorithmImpact: "Hệ thống AI thị giác (Computer Vision) gắn cờ Graphic/Gory Content, chặn đề xuất For You (FYP) hoặc cảnh báo nhạy cảm.",
       solutions: [
@@ -258,6 +258,146 @@ const TIKTOK_MEDICAL_POLICY = {
    */
   getStandardDisclaimer() {
     return "Thông tin mang tính tham khảo chuyên môn. Người bệnh cần thăm khám trực tiếp cùng bác sĩ chuyên khoa để có phác đồ điều trị phù hợp.";
+  },
+
+  // =========================================================================
+  // 4. TIÊU CHUẨN LỌC HÌNH ẢNH: TIẾP GIÁP VÙNG DA & SẮC ĐỘ HEMOGLOBIN
+  // (Skin-Adjacent Hemoglobin HSV/YCbCr Filter Specifications)
+  // =========================================================================
+  visualFilterConfig: {
+    // Hemoglobin Red Range: Hue 348°-10°, Sat 0.60-0.88, Val 0.18-0.55
+    hemoglobin: {
+      hueMin1: 348,
+      hueMax1: 360,
+      hueMin2: 0,
+      hueMax2: 10,
+      satMin: 0.60,
+      satMax: 0.88,
+      valMin: 0.18,
+      valMax: 0.55
+    },
+    // Human Skin YCbCr criteria: 135 <= Cr <= 180, 85 <= Cb <= 135
+    skinYCbCr: {
+      crMin: 135,
+      crMax: 180,
+      cbMin: 85,
+      cbMax: 135
+    },
+    // Minimum skin border contact required to suspect blood on human skin (40%)
+    minSkinContactRatio: 0.40,
+    // Graphic / Garment Red criteria: Saturation > 0.90
+    brightRedSaturationThreshold: 0.90,
+    // Cluster size boundaries (pixels on 160x110 canvas)
+    minClusterSize: 8,
+    maxClusterSize: 800,
+    // Uniform color & block geometry thresholds
+    uniformColorStdDevThreshold: 2.5,
+    uniformBoxFillRatioThreshold: 0.85,
+    minBoxSizeForFillRatio: 12,
+    // Minimum patch size for bright graphic red (Saturation > 0.90)
+    minGraphicRedPatchSize: 8,
+    // Safe label
+    safeRedLabel: "Màu sắc Đồ họa / Trang phục (An toàn)",
+    // Gemini Vision System Prompt
+    geminiSystemPrompt: `Bạn là hệ thống AI Kiểm duyệt Nội dung Y tế TikTok (TikTok Medical Policy AI Inspector) của Goodlife Media.
+Nhiệm vụ: Phân tích khung hình trích xuất từ video y tế để kiểm duyệt vi phạm hình ảnh nhạy cảm theo tiêu chuẩn TikTok Community Guidelines.
+
+TIÊU CHUẨN ĐÁNH GIÁ (TUYỆT ĐỐI TUÂN THỦ):
+
+1. CHỈ BÁO LỖI VI PHẠM ("is_violation": true) KHI:
+   - Thấy MÁU SINH HỌC THẬT trên da/mô người (chảy máu, rỉ máu thật từ cơ thể người).
+   - VẾT THƯƠNG HỞ (vết rạch mổ ngoại khoa hở, rách da bộc lộ mô thịt, khoang phẫu thuật).
+   - KIM TIÊM CẬN CẢNH (ảnh/video dí sát macro mũi kim tiêm nhọn đâm xuyên vào da thịt gây ghê rợn).
+
+2. TUYỆT ĐỐI BỎ QUA VÀ ĐÁNH DẤU AN TOÀN ("is_violation": false) ĐỐI VỚI:
+   - Quần áo đỏ, áo blouse/scrubs/váy/đồng phục màu đỏ.
+   - Chữ đỏ, tiêu đề video màu đỏ, phụ đề màu đỏ.
+   - Logo thương hiệu, icon, sticker màu đỏ.
+   - Nội thất màu đỏ, ghế khám đỏ, giường bệnh đỏ, phông nền studio màu đỏ.
+   - Son môi đỏ, mỹ phẩm trang điểm, thực phẩm, ánh đèn LED đỏ.
+   Khi phát hiện các sắc thái đỏ an toàn này, BẮT BUỘC gắn nhãn "Màu sắc Đồ họa / Trang phục (An toàn)" trong trường "safe_red_note".
+
+TRẢ VỀ ĐỐI TƯỢNG JSON (KHÔNG bọc codeblock markdown):
+{
+  "is_violation": boolean,
+  "violation_type": "blood_open_wounds" | "sharp_needles_macro" | null,
+  "confidence": number,
+  "safe_red_detected": boolean,
+  "safe_red_note": string | null,
+  "detected_objects": string[],
+  "reason": string,
+  "recommendation": string | null
+}`
+  },
+
+  /**
+   * Chuyển đổi RGB sang HSV (H: 0-360, S: 0-1, V: 0-1)
+   */
+  rgbToHsv(r, g, b) {
+    const rn = r / 255;
+    const gn = g / 255;
+    const bn = b / 255;
+    const max = Math.max(rn, gn, bn);
+    const min = Math.min(rn, gn, bn);
+    const d = max - min;
+    let h = 0;
+    const s = max === 0 ? 0 : d / max;
+    const v = max;
+
+    if (max !== min) {
+      if (max === rn) {
+        h = (gn - bn) / d + (gn < bn ? 6 : 0);
+      } else if (max === gn) {
+        h = (bn - rn) / d + 2;
+      } else if (max === bn) {
+        h = (rn - gn) / d + 4;
+      }
+      h *= 60;
+    }
+    return { h, s, v };
+  },
+
+  /**
+   * Chuyển đổi RGB sang YCbCr và kiểm tra màu da người theo chuẩn:
+   * YCbCr: 135 <= Cr <= 180, 85 <= Cb <= 135
+   */
+  isSkinPixel(r, g, b) {
+    const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+    const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+    const cfg = this.visualFilterConfig.skinYCbCr;
+    return (cr >= cfg.crMin && cr <= cfg.crMax && cb >= cfg.cbMin && cb <= cfg.cbMax);
+  },
+
+  /**
+   * Kiểm tra sắc tố đỏ sẫm Hemoglobin:
+   * Hue: 348°-10°, Saturation: 0.60-0.88, Value: 0.18-0.55
+   */
+  isHemoglobinPixel(r, g, b, hsv) {
+    const { h, s, v } = hsv || this.rgbToHsv(r, g, b);
+    const cfg = this.visualFilterConfig.hemoglobin;
+    const isHue = (h >= cfg.hueMin1 && h <= cfg.hueMax1) || (h >= cfg.hueMin2 && h <= cfg.hueMax2);
+    const isSat = (s >= cfg.satMin && s <= cfg.satMax);
+    const isVal = (v >= cfg.valMin && v <= cfg.valMax);
+    return isHue && isSat && isVal;
+  },
+
+  /**
+   * Kiểm tra mảng màu đỏ tươi đồ họa / trang phục:
+   * Đỏ tươi (Saturation > 0.90) hoặc giá trị Value chói
+   */
+  isBrightGraphicRed(r, g, b, hsv) {
+    const { h, s, v } = hsv || this.rgbToHsv(r, g, b);
+    const isRedHue = (h >= 340 || h <= 25);
+    const isHighSat = s > this.visualFilterConfig.brightRedSaturationThreshold;
+    const isBrightV = (v > 0.55 && s > 0.50);
+    return isRedHue && (isHighSat || isBrightV);
+  },
+
+  /**
+   * Lấy System Prompt chuẩn hóa cho Gemini Vision API
+   */
+  getGeminiSystemPrompt() {
+    return this.visualFilterConfig.geminiSystemPrompt;
   }
 };
 

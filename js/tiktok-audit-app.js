@@ -1073,6 +1073,8 @@ class TiktokAuditApp {
     }
 
     const finalizeResult = (violatingFrames, safeRedNote = null) => {
+      this.lastSafeRedFound = !!safeRedNote;
+      this.lastSafeRedNote = safeRedNote;
       this.setPipelineStep(this.stepVisual2, 'done', '2. ✓ Hoàn tất phân tích');
       if (violatingFrames.length > 0) {
         this.setPipelineStep(this.stepVisual3, 'danger', `3. 🚨 Bắt ${violatingFrames.length} Ảnh Vi Phạm`);
@@ -1105,11 +1107,11 @@ class TiktokAuditApp {
               isSuspected: false,
               dismissed: false,
               source: 'gemini_vision',
-              reason: `🚨 AI Gemini Vision (2.5 Flash) phát hiện: ${aiResult.reason || 'Dấu hiệu máu sinh học / vết thương hở y tế.'}`
+              reason: `🚨 AI Gemini Vision (2.5 Flash) phát hiện: ${aiResult.reason || 'Dấu hiệu máu sinh học thật trên da/mô người, vết thương hở hoặc kim tiêm cận cảnh.'}`
             });
             finalizeResult(detectedViolations);
           } else {
-            const note = aiResult.safe_red_note || (aiResult.safe_red_detected ? 'Phát hiện sắc đỏ từ trang phục/đồ họa (An toàn - Không phải máu y khoa)' : null);
+            const note = aiResult.safe_red_note || (aiResult.safe_red_detected ? 'Màu sắc Đồ họa / Trang phục (An toàn): Phát hiện sắc đỏ từ trang phục/đồ họa (Không phải máu y khoa).' : (offlineResult.safeRedFound ? offlineResult.safeRedNote : null));
             finalizeResult([], note);
           }
         })
@@ -1148,6 +1150,9 @@ class TiktokAuditApp {
   // -------------------------------------------------------------------------
   scanFramesInBackground(videoUrl, duration) {
     if (!this.violatingFramesContainer) return;
+
+    this.lastSafeRedFound = false;
+    this.lastSafeRedNote = null;
 
     if (this.safeRedDetectedBanner) {
       this.safeRedDetectedBanner.classList.add('hidden');
@@ -1202,7 +1207,12 @@ class TiktokAuditApp {
       // Show banner if safe red objects were disambiguated
       if (totalSafeRedFrames > 0 && this.safeRedDetectedBanner && this.safeRedDetectedText) {
         this.safeRedDetectedBanner.classList.remove('hidden');
-        this.safeRedDetectedText.textContent = `Hệ thống đã nhận diện ${totalSafeRedFrames} khung hình chứa sắc đỏ (trang phục, chữ viết, đồ họa) và tự động phân loại: AN TOÀN (Không nhầm lẫn với máu y khoa).`;
+        this.safeRedDetectedText.textContent = `Hệ thống đã nhận diện ${totalSafeRedFrames} khung hình chứa sắc đỏ (trang phục, chữ viết, đồ họa) và tự động gắn nhãn: Màu sắc Đồ họa / Trang phục (An toàn) — Không nhầm lẫn với máu y khoa.`;
+        this.lastSafeRedFound = true;
+        this.lastSafeRedNote = this.safeRedDetectedText.textContent;
+      } else {
+        this.lastSafeRedFound = false;
+        this.lastSafeRedNote = null;
       }
 
       this.renderViolatingFramesResult(detectedViolatingFrames);
@@ -1276,7 +1286,7 @@ class TiktokAuditApp {
               isSuspected: false,
               dismissed: false,
               source: 'gemini_vision',
-              reason: `🚨 AI Gemini Vision (2.5 Flash) xác nhận vi phạm: ${aiVerdict.reason || 'Dấu hiệu máu sinh học / vết thương hở y tế.'}`
+              reason: `🚨 AI Gemini Vision (2.5 Flash) xác nhận vi phạm: ${aiVerdict.reason || 'Dấu hiệu máu sinh học thật trên da/mô người, vết thương hở hoặc kim tiêm cận cảnh.'}`
             });
           } else {
             // Disambiguated by AI as safe red object!
@@ -1339,8 +1349,9 @@ class TiktokAuditApp {
 
   // =========================================================================
   // CƠ CHẾ 2: BỘ LỌC CỤC BỘ TRÊN CANVAS (Offline Heuristic)
-  // Thuật toán: "Kiểm tra Ngữ cảnh Vùng Da & Sắc độ Hemoglobin" (Skin-Context & Hemoglobin HSV Filter)
-  // Thay thế hoàn toàn thuật toán đếm pixel đỏ thô sơ trước đây
+  // Thuật toán: "Kiểm tra Tiếp giáp Vùng Da & Sắc độ Hemoglobin"
+  // (Skin-Adjacent Hemoglobin HSV/YCbCr Filter)
+  // Xóa bỏ hoàn toàn vòng lặp đếm pixel màu đỏ thô sơ (r > 180 && g < 50)
   // =========================================================================
   analyzeCanvasFrameOffline(canvas, ctx) {
     const W = canvas.width;
@@ -1349,15 +1360,34 @@ class TiktokAuditApp {
     const imgData = ctx.getImageData(0, 0, W, H);
     const data = imgData.data;
 
+    const policy = (typeof TIKTOK_MEDICAL_POLICY !== 'undefined') ? TIKTOK_MEDICAL_POLICY : null;
+    const cfg = (policy && policy.visualFilterConfig) || {
+      hemoglobin: { hueMin1: 348, hueMax1: 360, hueMin2: 0, hueMax2: 10, satMin: 0.60, satMax: 0.88, valMin: 0.18, valMax: 0.55 },
+      skinYCbCr: { crMin: 135, crMax: 180, cbMin: 85, cbMax: 135 },
+      minSkinContactRatio: 0.40,
+      brightRedSaturationThreshold: 0.90,
+      minClusterSize: 8,
+      maxClusterSize: 800,
+      uniformColorStdDevThreshold: 2.5,
+      uniformBoxFillRatioThreshold: 0.85,
+      minBoxSizeForFillRatio: 12,
+      minGraphicRedPatchSize: 8,
+      safeRedLabel: "Màu sắc Đồ họa / Trang phục (An toàn)"
+    };
+
     // Pixel classification map:
     // 0: Neutral / Background / Other
-    // 1: Human Skin Pixel (RGB + YCbCr criteria)
+    // 1: Human Skin Pixel (YCbCr: 135 <= Cr <= 180, 85 <= Cb <= 135)
     // 2: Hemoglobin Red Pixel (Hue 348°-10°, Sat 0.60-0.88, Val 0.18-0.55)
-    // 3: Safe Graphic / Garment Red Pixel (Pure RGB, Sat > 0.88, Val > 0.58)
+    // 3: Safe Graphic / Garment Red Pixel (Saturation > 0.90 hoặc đỏ tươi đồ họa)
     const pixelType = new Uint8Array(totalPixels);
     let skinPixelCount = 0;
     let safeGraphicRedCount = 0;
     let hemoglobinCandidateCount = 0;
+
+    const hgb = cfg.hemoglobin;
+    const skin = cfg.skinYCbCr;
+    const brightSat = cfg.brightRedSaturationThreshold;
 
     for (let i = 0; i < totalPixels; i++) {
       const p = i * 4;
@@ -1371,7 +1401,7 @@ class TiktokAuditApp {
         continue;
       }
 
-      // Convert RGB to HSV
+      // 1. Chuyển đổi RGB sang HSV
       const rn = r / 255;
       const gn = g / 255;
       const bn = b / 255;
@@ -1393,40 +1423,25 @@ class TiktokAuditApp {
         h *= 60; // 0° to 360°
       }
 
-      // ---------------------------------------------------------------------
-      // Bước C: Tiêu chuẩn nhận diện Màu Da Người (Human Skin-Tone RGB/YCbCr)
-      // RGB: R > 95, G > 40, B > 20, R > G, R > B, |R - G| > 15
+      // 2. Tiêu chuẩn nhận diện Màu Da Người (Human Skin-Tone YCbCr)
       // YCbCr: 135 <= Cr <= 180, 85 <= Cb <= 135
-      // ---------------------------------------------------------------------
-      const isSkinRgb = (r > 95 && g > 40 && b > 20 && r > g && r > b && Math.abs(r - g) > 15);
-      let isSkin = false;
-      if (isSkinRgb) {
-        const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
-        const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
-        if (cr >= 135 && cr <= 180 && cb >= 85 && cb <= 135) {
-          isSkin = true;
-        }
-      }
+      const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+      const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+      const isSkin = (cr >= skin.crMin && cr <= skin.crMax && cb >= skin.cbMin && cb <= skin.cbMax);
 
-      // Red Hue check: 340° to 360° OR 0° to 20°
-      const isRedHue = (h >= 340 || h <= 20);
+      // Red Hue check: 340° to 360° OR 0° to 25°
+      const isRedHue = (h >= 340 || h <= 25);
 
-      // ---------------------------------------------------------------------
-      // Bước A (Loại trừ Đồ họa & Trang phục):
-      // Màu đỏ tươi đồ họa (RGB thuần, S > 0.90 hoặc Value chói > 0.55)
-      // ---------------------------------------------------------------------
-      const isGraphicGarmentRed = isRedHue && (s > 0.90 || v > 0.55 || (r > 175 && g < 55 && b < 55));
+      // 3. Phân loại mảng màu đỏ tươi đồ họa / trang phục (Saturation > 0.90 hoặc sáng chói)
+      const isBrightGraphicRed = isRedHue && (s > brightSat || (v > 0.55 && s > 0.50));
 
-      // ---------------------------------------------------------------------
-      // Bước B (Kiểm tra Sắc độ Hemoglobin Sẫm):
-      // Máu thật trong y khoa: Hue 348° đến 10°, Sat 0.60 đến 0.88, Val 0.18 đến 0.55
-      // ---------------------------------------------------------------------
-      const isHemoglobinHue = (h >= 348 || h <= 10);
-      const isHemoglobinSat = (s >= 0.60 && s <= 0.88);
-      const isHemoglobinVal = (v >= 0.18 && v <= 0.55);
-      const isHemoglobin = isHemoglobinHue && isHemoglobinSat && isHemoglobinVal && !isGraphicGarmentRed;
+      // 4. Phân loại dải đỏ sẫm Hemoglobin (Hue 348°-10°, Sat 0.60-0.88, Val 0.18-0.55)
+      const isHemoglobinHue = (h >= hgb.hueMin1 && h <= hgb.hueMax1) || (h >= hgb.hueMin2 && h <= hgb.hueMax2);
+      const isHemoglobinSat = (s >= hgb.satMin && s <= hgb.satMax);
+      const isHemoglobinVal = (v >= hgb.valMin && v <= hgb.valMax);
+      const isHemoglobin = isHemoglobinHue && isHemoglobinSat && isHemoglobinVal && !isBrightGraphicRed;
 
-      if (isGraphicGarmentRed) {
+      if (isBrightGraphicRed) {
         pixelType[i] = 3;
         safeGraphicRedCount++;
       } else if (isHemoglobin) {
@@ -1442,14 +1457,19 @@ class TiktokAuditApp {
 
     // -----------------------------------------------------------------------
     // Bước C: Connected Component Clustering & Kiểm tra Tiếp giáp Vùng Da Người
-    // Một cụm điểm ảnh đỏ sẫm CHỈ ĐƯỢC nghi ngờ là vết máu nếu xung quanh viền
-    // có ít nhất 40% diện tích tiếp giáp là điểm ảnh màu da người
-    // VÀ kích thước cụm nhỏ, hình thái bất đối xứng (loại trừ khối đồ họa cạnh thẳng).
+    // Một cụm điểm ảnh đỏ sẫm CHỈ ĐƯỢC nghi ngờ là vết máu nếu:
+    // 1. Kích thước cụm hợp lệ (từ minClusterSize đến maxClusterSize điểm ảnh)
+    // 2. KHÔNG PHẢI khối màu đồng nhất hoặc trang phục diện tích lớn (loại trừ khối cạnh thẳng/đồng màu)
+    // 3. BẮT BUỘC có tối thiểu 40% viền xung quanh tiếp giáp trực tiếp với điểm ảnh màu da người (YCbCr)
     // -----------------------------------------------------------------------
     const visited = new Uint8Array(totalPixels);
     const suspectedClusters = [];
     const safeRedClusters = [];
     let maxSkinContactFound = 0;
+
+    // Helper for boundary key encoding:
+    // nx in [-1, W], ny in [-1, H] -> padded coordinate space (W + 2)
+    const stride = W + 2;
 
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
@@ -1462,8 +1482,10 @@ class TiktokAuditApp {
         let clusterSize = 0;
         let minX = x, maxX = x, minY = y, maxY = y;
 
-        // Border neighbors set (encoded as 1D coordinate)
+        // Border neighbors set (uniquely keyed for every neighbor point, including frame boundary)
         const borderNeighbors = new Set();
+        let rSum = 0, gSum = 0, bSum = 0;
+        let rSqSum = 0, gSqSum = 0, bSqSum = 0;
 
         let head = 0;
         while (head < queue.length) {
@@ -1471,6 +1493,13 @@ class TiktokAuditApp {
           clusterSize++;
           const cx = curr % W;
           const cy = Math.floor(curr / W);
+
+          const cp = curr * 4;
+          const crVal = data[cp];
+          const cgVal = data[cp + 1];
+          const cbVal = data[cp + 2];
+          rSum += crVal; gSum += cgVal; bSum += cbVal;
+          rSqSum += crVal * crVal; gSqSum += cgVal * cgVal; bSqSum += cbVal * cbVal;
 
           if (cx < minX) minX = cx;
           if (cx > maxX) maxX = cx;
@@ -1483,6 +1512,10 @@ class TiktokAuditApp {
               if (dx === 0 && dy === 0) continue;
               const nx = cx + dx;
               const ny = cy + dy;
+
+              // Uniquely key every neighbor position (padded index >= 0)
+              const neighborKey = (ny + 1) * stride + (nx + 1);
+
               if (nx >= 0 && nx < W && ny >= 0 && ny < H) {
                 const nIdx = ny * W + nx;
                 if (pixelType[nIdx] === 2) {
@@ -1491,22 +1524,34 @@ class TiktokAuditApp {
                     queue.push(nIdx);
                   }
                 } else {
-                  borderNeighbors.add(nIdx);
+                  borderNeighbors.add(neighborKey);
                 }
               } else {
-                borderNeighbors.add(-1); // Frame boundary
+                // Out-of-bounds frame boundary neighbor (each boundary point gets its unique key)
+                borderNeighbors.add(neighborKey);
               }
             }
           }
         }
 
+        // Filter out tiny noise clusters (< minClusterSize)
+        // Camera sensor noise of 1-7 pixels is ignored and does NOT pollute safeRedClusters
+        if (clusterSize < cfg.minClusterSize) {
+          continue;
+        }
+
         // Measure skin adjacency along perimeter
         let skinBorderCount = 0;
-        let totalBorderCount = 0;
-        borderNeighbors.forEach(nIdx => {
-          totalBorderCount++;
-          if (nIdx >= 0 && pixelType[nIdx] === 1) {
-            skinBorderCount++;
+        let totalBorderCount = borderNeighbors.size;
+
+        borderNeighbors.forEach(key => {
+          const ny = Math.floor(key / stride) - 1;
+          const nx = (key % stride) - 1;
+          if (nx >= 0 && nx < W && ny >= 0 && ny < H) {
+            const nIdx = ny * W + nx;
+            if (pixelType[nIdx] === 1) {
+              skinBorderCount++;
+            }
           }
         });
 
@@ -1520,47 +1565,68 @@ class TiktokAuditApp {
         const boxArea = boxWidth * boxHeight;
         const fillRatio = boxArea > 0 ? (clusterSize / boxArea) : 0;
 
-        // Criteria Bước C:
-        // 1. Kích thước cụm nhỏ (từ 8 đến 800 điểm ảnh trên frame 160x110)
-        // 2. Hình thái bất đối xứng (loại trừ khối chữ nhật/đồ họa có cạnh thẳng: fillRatio >= 0.85 khi clusterSize >= 25)
-        // 3. Tiếp giáp ít nhất 40% diện tích viền với màu da người
-        const isClusterSizeValid = (clusterSize >= 8 && clusterSize <= 800);
-        const isGraphicUniformBox = (clusterSize >= 25 && fillRatio >= 0.85);
-        const isNotGraphicLargeBox = !isGraphicUniformBox;
-        const isSufficientSkinContact = (skinContactRatio >= 0.40);
+        // Color variance test (uniform flat color block check)
+        const rVar = Math.max(0, (rSqSum / clusterSize) - Math.pow(rSum / clusterSize, 2));
+        const gVar = Math.max(0, (gSqSum / clusterSize) - Math.pow(gSum / clusterSize, 2));
+        const bVar = Math.max(0, (bSqSum / clusterSize) - Math.pow(bSum / clusterSize, 2));
+        const colorStdDev = Math.sqrt((rVar + gVar + bVar) / 3);
 
-        if (isClusterSizeValid && isNotGraphicLargeBox && isSufficientSkinContact) {
+        // Uniform color block criteria:
+        // 1. fillRatio >= uniformBoxFillRatioThreshold (solid rectangular graphic box/button/banner) khi clusterSize >= minBoxSizeForFillRatio (12) VÀ colorStdDev < 5.0 (tránh nhầm lẫn vết thương lồi lõm)
+        // 2. OR colorStdDev < uniformColorStdDevThreshold (2.5) khi clusterSize >= minClusterSize (8) (khối màu phẳng đồng nhất của đồ họa máy tính)
+        // 3. OR clusterSize > maxClusterSize (800) (khối diện tích lớn của trang phục, rèm cửa, phông nền)
+        const isGraphicUniformBox = (clusterSize >= cfg.minBoxSizeForFillRatio && fillRatio >= cfg.uniformBoxFillRatioThreshold && colorStdDev < 5.0);
+        const isUniformFlatColor = (clusterSize >= cfg.minClusterSize && colorStdDev < cfg.uniformColorStdDevThreshold);
+        const isLargeGarmentBlock = (clusterSize > cfg.maxClusterSize);
+        const isUniformOrGarment = isGraphicUniformBox || isUniformFlatColor || isLargeGarmentBlock;
+
+        // TIÊU CHUẨN CẢNH BÁO NGHI NGỜ MÁU:
+        // 1. Điểm ảnh dải Hemoglobin đã được gom cụm
+        // 2. Kích thước cụm hợp lệ (minClusterSize đến maxClusterSize pixel)
+        // 3. Không phải khối màu đồng nhất hoặc trang phục diện tích lớn
+        // 4. BẮT BUỘC có tối thiểu 40% viền xung quanh tiếp giáp trực tiếp với điểm ảnh màu da người
+        const isClusterSizeValid = (clusterSize >= cfg.minClusterSize && clusterSize <= cfg.maxClusterSize);
+        const isSufficientSkinContact = (skinContactRatio >= cfg.minSkinContactRatio);
+
+        if (isClusterSizeValid && !isUniformOrGarment && isSufficientSkinContact) {
           suspectedClusters.push({
             size: clusterSize,
             skinContactRatio: skinContactRatio,
             fillRatio: fillRatio,
+            colorStdDev: Math.round(colorStdDev * 10) / 10,
             bounds: { minX, maxX, minY, maxY }
           });
         } else {
-          // If red is NOT surrounded by human skin or is a large graphic block/garment,
-          // it is automatically categorized as Safe Red Object (Vật thể/Phông nền màu đỏ an toàn)
+          // Tự động gắn nhãn "Màu sắc Đồ họa / Trang phục (An toàn)"
           safeRedClusters.push({
             size: clusterSize,
             skinContactRatio: skinContactRatio,
             fillRatio: fillRatio,
-            reason: skinContactRatio < 0.40 ? 'Không nằm trên vùng da người (< 40%)' : (isGraphicUniformBox ? 'Khối đồ họa có cạnh thẳng' : 'Khối diện tích lớn/trang phục')
+            colorStdDev: Math.round(colorStdDev * 10) / 10,
+            reason: skinContactRatio < cfg.minSkinContactRatio
+              ? `Không tiếp giáp đủ ${Math.round(cfg.minSkinContactRatio * 100)}% diện tích viền với màu da người (${Math.round(skinContactRatio * 100)}%)`
+              : (isLargeGarmentBlock ? 'Khối diện tích lớn (Trang phục/Phông nền)' : 'Khối màu đồng nhất đồ họa')
           });
         }
       }
     }
 
     const hasSuspectedViolation = suspectedClusters.length > 0;
-    const hasSafeRedObjects = (safeGraphicRedCount > 40 || safeRedClusters.length > 0);
+    const hasSafeRedObjects = (safeGraphicRedCount >= cfg.minGraphicRedPatchSize || safeRedClusters.length > 0);
 
     let safeRedNote = null;
+    let safeRedLabel = null;
     if (hasSafeRedObjects && !hasSuspectedViolation) {
-      safeRedNote = 'Vật thể/Phông nền màu đỏ an toàn (100% Hợp lệ) — Phát hiện sắc đỏ từ trang phục/đồ họa (An toàn - Không phải máu y khoa)';
+      safeRedLabel = cfg.safeRedLabel || 'Màu sắc Đồ họa / Trang phục (An toàn)';
+      safeRedNote = `${safeRedLabel}: Đã tự động loại trừ mảng màu đỏ tươi (Saturation > 0.90) hoặc khối màu đồng nhất/trang phục (Không phải máu y khoa trên da).`;
     }
 
     return {
       isSuspectedViolation: hasSuspectedViolation,
       suspectedClusters: suspectedClusters,
+      safeRedClusters: safeRedClusters,
       safeRedFound: hasSafeRedObjects,
+      safeRedLabel: safeRedLabel,
       safeRedNote: safeRedNote,
       maxSkinContact: maxSkinContactFound,
       safeGraphicRedCount: safeGraphicRedCount,
@@ -1571,7 +1637,7 @@ class TiktokAuditApp {
 
   // =========================================================================
   // CƠ CHẾ 1: PHÂN BIỆT NGỮ CẢNH BẰNG AI THỊ GIÁC (GEMINI VISION 2.5 FLASH)
-  // Contextual Disambiguation: Phân biệt máu sinh học vs áo đỏ, banner, son môi
+  // Contextual Disambiguation: Phân biệt máu sinh học thật vs áo đỏ, banner, son môi
   // =========================================================================
   async analyzeFrameWithGeminiVision(base64DataUrl) {
     const apiKey = this.geminiApiKey || localStorage.getItem('goodlife_gemini_api_key');
@@ -1582,42 +1648,54 @@ class TiktokAuditApp {
     const cleanBase64 = base64DataUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-    const promptText = `Bạn là hệ thống AI Kiểm duyệt Nội dung Y tế TikTok (TikTok Medical Policy AI Inspector).
-Nhiệm vụ của bạn là phân tích khung hình trích xuất từ video y tế để phát hiện vi phạm chính sách "Máu & Vết thương hở" (Graphic Blood & Open Wounds), tuyệt đối tuân thủ QUY TẮC PHÂN BIỆT NGỮ CẢNH (Contextual Disambiguation):
+    const systemInstructionText = (typeof TIKTOK_MEDICAL_POLICY !== 'undefined' && TIKTOK_MEDICAL_POLICY.getGeminiSystemPrompt)
+      ? TIKTOK_MEDICAL_POLICY.getGeminiSystemPrompt()
+      : `Bạn là hệ thống AI Kiểm duyệt Nội dung Y tế TikTok (TikTok Medical Policy AI Inspector) của Goodlife Media.
+Nhiệm vụ: Phân tích khung hình trích xuất từ video y tế để kiểm duyệt vi phạm hình ảnh nhạy cảm theo tiêu chuẩn TikTok Community Guidelines.
 
-1. CHỈ ĐÁNH DẤU VI PHẠM ("is_violation": true) KHI:
-- Nhìn thấy máu sinh học thật chảy trên da/mô người.
-- Vết rạch phẫu thuật hở, khoang mổ đang thao tác bộc lộ mô hoặc mạch máu.
-- Gạc y tế thấm đẫm máu tươi, ống hút dịch chứa đầy máu y khoa.
-- Dịch cơ thể hoặc máu chảy trong quá trình làm thủ thuật xâm lấn (như nặn mụn chảy máu, nhổ răng chảy máu, phẫu thuật thẩm mỹ cắt mí, nâng mũi, hút mỡ).
+TIÊU CHUẨN ĐÁNH GIÁ (TUYỆT ĐỐI TUÂN THỦ):
 
-2. TUYỆT ĐỐI KHÔNG BÁO LỖI ("is_violation": false - SAFE RED OBJECTS):
-- Quần áo/trang phục/váy áo/đồng phục màu đỏ.
-- Chữ viết/tiêu đề/banner đồ họa/phụ đề/nhãn sticker màu đỏ.
-- Logo thương hiệu hoặc icon màu đỏ.
-- Nội thất/ghế đỏ/giường khám/phông nền studio màu đỏ.
-- Ánh đèn LED đỏ/hiệu ứng ánh sáng màu đỏ.
-- Son môi/mỹ phẩm trang điểm màu đỏ.
-- Trái cây/thực phẩm/bao bì đồ ăn màu đỏ.
+1. CHỈ BÁO LỖI VI PHẠM ("is_violation": true) KHI:
+   - Thấy MÁU SINH HỌC THẬT trên da/mô người (chảy máu, rỉ máu thật từ cơ thể người).
+   - VẾT THƯƠNG HỞ (vết rạch mổ ngoại khoa hở, rách da bộc lộ mô thịt, khoang phẫu thuật).
+   - KIM TIÊM CẬN CẢNH (ảnh/video dí sát macro mũi kim tiêm nhọn đâm xuyên vào da thịt gây ghê rợn).
 
-Trong kết quả trả về, nếu thấy các vật thể màu đỏ an toàn này, BẮT BUỘC ghi rõ trong trường "safe_red_note": "Phát hiện sắc đỏ từ trang phục/đồ họa (An toàn - Không phải máu y khoa)".
+2. TUYỆT ĐỐI BỎ QUA VÀ ĐÁNH DẤU AN TOÀN ("is_violation": false) ĐỐI VỚI:
+   - Quần áo đỏ, áo blouse/scrubs/váy/đồng phục màu đỏ.
+   - Chữ đỏ, tiêu đề video màu đỏ, phụ đề màu đỏ.
+   - Logo thương hiệu, icon, sticker màu đỏ.
+   - Nội thất màu đỏ, ghế khám đỏ, giường bệnh đỏ, phông nền studio màu đỏ.
+   - Son môi đỏ, mỹ phẩm trang điểm, thực phẩm, ánh đèn LED đỏ.
+   Khi phát hiện các sắc thái đỏ an toàn này, BẮT BUỘC gắn nhãn "Màu sắc Đồ họa / Trang phục (An toàn)" trong trường "safe_red_note".
 
-TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùng \`\`\`json):
+TRẢ VỀ ĐỐI TƯỢNG JSON (KHÔNG bọc codeblock markdown):
 {
   "is_violation": boolean,
-  "violation_type": "blood_open_wounds" | null,
+  "violation_type": "blood_open_wounds" | "sharp_needles_macro" | null,
   "confidence": number,
   "safe_red_detected": boolean,
   "safe_red_note": string | null,
   "detected_objects": string[],
   "reason": string,
   "recommendation": string | null
-}
-`;
+}`;
+
+    const promptText = `Phân tích khung hình y tế này theo quy định kiểm duyệt nghiêm ngặt:
+- CHỈ báo lỗi ("is_violation": true) khi thấy máu sinh học thật trên da/mô người, vết thương hở hoặc kim tiêm cận cảnh đâm vào da thịt.
+- Tuyệt đối bỏ qua quần áo đỏ, chữ đỏ, logo và nội thất màu đỏ; tự động gắn nhãn "Màu sắc Đồ họa / Trang phục (An toàn)" trong "safe_red_note" và đánh dấu "is_violation": false.
+Trả về duy nhất 1 JSON object theo định dạng đã quy định.`;
 
     const payload = {
+      system_instruction: {
+        parts: [
+          {
+            text: systemInstructionText
+          }
+        ]
+      },
       contents: [
         {
+          role: "user",
           parts: [
             {
               inlineData: {
@@ -1682,8 +1760,13 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
     // Update Visual Verdict Badge
     if (this.visualVerdictBadge) {
       if (activeViolations.length === 0) {
-        this.visualVerdictBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
-        this.visualVerdictBadge.innerHTML = '✓ Hình Ảnh Đạt Chuẩn An Toàn (100/100)';
+        if (this.lastSafeRedFound) {
+          this.visualVerdictBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          this.visualVerdictBadge.innerHTML = '✓ Màu sắc Đồ họa / Trang phục (An toàn) (100/100)';
+        } else {
+          this.visualVerdictBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          this.visualVerdictBadge.innerHTML = '✓ Hình Ảnh Đạt Chuẩn An Toàn (100/100)';
+        }
       } else {
         const isAllSuspected = activeViolations.every(f => f.isSuspected);
         if (isAllSuspected) {
@@ -1698,21 +1781,39 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
 
     // Case 1: Totally clean video/image (never had any suspected frames)
     if (this.violatingFrames.length === 0) {
-      this.violatingFramesContainer.innerHTML = `
-        <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-300 flex items-start gap-3">
-          <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-            ✓
+      if (this.lastSafeRedFound) {
+        this.violatingFramesContainer.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-xs text-emerald-300 flex items-start gap-3">
+            <div class="w-6 h-6 rounded-lg bg-emerald-500/25 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-500/40">
+              🛡️
+            </div>
+            <div class="space-y-1">
+              <h5 class="font-bold text-emerald-200">
+                Đã gắn nhãn: Màu sắc Đồ họa / Trang phục (An toàn) — Điểm an toàn: 100/100
+              </h5>
+              <p class="text-[11px] text-slate-300 leading-relaxed">
+                Bộ lọc Tiếp giáp Da &amp; Hemoglobin đã tự động phân biệt sắc đỏ từ trang phục y tế/blouse, tiêu đề chữ viết, logo thương hiệu hoặc khối màu đồng nhất. Khung hình hoàn toàn sạch và an toàn để đăng tải TikTok.
+              </p>
+            </div>
           </div>
-          <div class="space-y-1">
-            <h5 class="font-bold text-emerald-200">
-              Không phát hiện khung hình vi phạm hình ảnh!
-            </h5>
-            <p class="text-[11px] text-slate-300 leading-relaxed">
-              Video không có vết thương hở rỉ máu, không dí sát mũi kim tiêm macro đâm vào da, không lộ thông tin bảo mật của bệnh nhân. Đủ điều kiện thị giác phân phối TikTok.
-            </p>
+        `;
+      } else {
+        this.violatingFramesContainer.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-300 flex items-start gap-3">
+            <div class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+              ✓
+            </div>
+            <div class="space-y-1">
+              <h5 class="font-bold text-emerald-200">
+                Không phát hiện khung hình vi phạm hình ảnh!
+              </h5>
+              <p class="text-[11px] text-slate-300 leading-relaxed">
+                Video không có vết thương hở rỉ máu, không dí sát mũi kim tiêm macro đâm vào da, không lộ thông tin bảo mật của bệnh nhân. Đủ điều kiện thị giác phân phối TikTok.
+              </p>
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      }
       return;
     }
 
@@ -1720,14 +1821,15 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
 
     // If all frames were dismissed by user, show success banner on top, followed by interactive frame cards
     if (activeViolations.length === 0) {
+      this.lastSafeRedFound = true;
       html += `
         <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-xs text-emerald-300 flex items-start gap-3 mb-3">
           <div class="w-6 h-6 rounded-lg bg-emerald-500/25 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-500/40">
-            ✓
+            🛡️
           </div>
           <div class="space-y-1 flex-1">
             <h5 class="font-bold text-emerald-200 flex items-center gap-2">
-              <span>Đã xác nhận toàn bộ An toàn — Điểm an toàn hình ảnh: 100/100!</span>
+              <span>Đã gắn nhãn: Màu sắc Đồ họa / Trang phục (An toàn) — Điểm an toàn hình ảnh: 100/100!</span>
             </h5>
             <p class="text-[11px] text-slate-300 leading-relaxed">
               Người dùng đã rà soát và xác nhận các sắc thái đỏ chỉ là đồ vật / màu áo y tế an toàn. Cảnh báo đã được gỡ bỏ hoàn toàn. Bạn có thể bấm "↩ Khôi phục cảnh báo" bên dưới nếu muốn kiểm tra lại.
@@ -1757,7 +1859,7 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
       }
 
       const badgeText = isDismissed
-        ? '✓ Đã xác nhận an toàn: Đồ vật / Màu áo'
+        ? '✓ Màu sắc Đồ họa / Trang phục (An toàn)'
         : (isSuspected 
             ? '⚠️ Nghi ngờ sắc thái mô/máu trên vùng da (Cần kiểm tra)' 
             : `🚨 Khung Hình Vi Phạm Tại ${frame.timestamp}`);
@@ -1786,7 +1888,7 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
                 type="button" 
                 onclick="window.tiktokAuditApp.toggleFrameDismiss(${index})" 
                 class="btn-frame-dismiss px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1.5 ${isDismissed ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10' : 'bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-200 border border-emerald-500/40 shadow-sm'}">
-                <span>${isDismissed ? '↩ Khôi phục cảnh báo' : '✓ Xác nhận đây chỉ là đồ vật/màu áo (Bỏ cảnh báo)'}</span>
+                <span>${isDismissed ? '↩ Khôi phục cảnh báo' : '✓ Gắn nhãn Màu sắc Đồ họa / Trang phục (An toàn)'}</span>
               </button>
             </div>
 
@@ -1831,12 +1933,13 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
     const activeViolations = this.violatingFrames.filter(f => !f.dismissed);
 
     if (activeViolations.length === 0) {
+      this.lastSafeRedFound = true;
       this.setPipelineStep(this.stepVisual3, 'done', '3. ✓ Khung hình Đạt Chuẩn 100/100 (Đã xác nhận)');
-      this.showToast('✓ Đã xác nhận khung hình là đồ vật/màu áo. Điểm an toàn hình ảnh đạt 100/100!');
+      this.showToast('✓ Đã xác nhận: Màu sắc Đồ họa / Trang phục (An toàn). Điểm an toàn hình ảnh đạt 100/100!');
     } else {
       this.setPipelineStep(this.stepVisual3, 'danger', `3. 🚨 Còn ${activeViolations.length} Ảnh Cần Xử Lý`);
       if (frame.dismissed) {
-        this.showToast(`✓ Đã bỏ cảnh báo khung hình tại ${frame.timestamp}.`);
+        this.showToast(`✓ Đã gắn nhãn Màu sắc Đồ họa / Trang phục (An toàn) tại ${frame.timestamp}.`);
       } else {
         this.showToast(`Đã khôi phục cảnh báo khung hình tại ${frame.timestamp}.`);
       }
@@ -1874,7 +1977,7 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
 
       if (result.is_violation === false) {
         frame.dismissed = true;
-        const note = result.safe_red_note || 'Phát hiện sắc đỏ từ trang phục/đồ họa (An toàn - Không phải máu y khoa)';
+        const note = result.safe_red_note || 'Màu sắc Đồ họa / Trang phục (An toàn): Phát hiện sắc đỏ từ trang phục/đồ họa (Không phải máu y khoa)';
         frame.reason = `✓ AI Gemini Vision 2.5 Flash xác nhận AN TOÀN: ${note}.`;
 
         if (this.safeRedDetectedBanner && this.safeRedDetectedText) {
@@ -1884,14 +1987,14 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
 
         this.renderViolatingFramesResult(this.violatingFrames);
         this.updateOverallPipelineStatus();
-        this.showToast('✓ AI Gemini Vision 2.5 Flash: Đã phân biệt trang phục/đồ họa an toàn (Không phải máu y khoa)!');
+        this.showToast('✓ AI Gemini Vision 2.5 Flash: Đã xác nhận Màu sắc Đồ họa / Trang phục (An toàn)!');
       } else {
         frame.dismissed = false;
         frame.isSuspected = false;
-        frame.reason = `🚨 AI Gemini Vision 2.5 Flash xác nhận vi phạm: ${result.reason || 'Dấu hiệu máu sinh học / vết thương hở y tế.'}`;
+        frame.reason = `🚨 AI Gemini Vision 2.5 Flash xác nhận vi phạm: ${result.reason || 'Dấu hiệu máu sinh học thật trên da/mô người, vết thương hở hoặc kim tiêm cận cảnh.'}`;
         this.renderViolatingFramesResult(this.violatingFrames);
         this.updateOverallPipelineStatus();
-        this.showToast('🚨 AI Gemini Vision 2.5 Flash: Phát hiện vết rạch phẫu thuật / máu y khoa!');
+        this.showToast('🚨 AI Gemini Vision 2.5 Flash: Phát hiện vi phạm máu sinh học / vết thương hở / kim tiêm cận cảnh!');
       }
     } catch (err) {
       console.error(err);
@@ -1930,8 +2033,14 @@ TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON (KHÔNG bọc markdown, KHÔNG dùn
 }
 
 // Khởi tạo ứng dụng khi DOM đã sẵn sàng
-document.addEventListener('DOMContentLoaded', () => {
-  window.tiktokAuditApp = new TiktokAuditApp();
-});
+if (typeof document !== 'undefined' && document.addEventListener) {
+  document.addEventListener('DOMContentLoaded', () => {
+    window.tiktokAuditApp = new TiktokAuditApp();
+  });
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = TiktokAuditApp;
+}
 
 

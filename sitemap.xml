@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://goodlifemedia.vn/</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://goodlifemedia.vn/assets/goodlife-logo.png</image:loc>
+      <image:title>Goodlife Media - Dịch Vụ Xây Kênh TikTok Bác Sĩ &amp; Phòng Khám</image:title>
+      <image:caption>Logo Goodlife Media - Đối tác MCN TikTok y tế hàng đầu tại Việt Nam</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://goodlifemedia.vn/assets/clinic-after.jpg</image:loc>
+      <image:title>Thiết kế phòng khám Sensory Design</image:title>
+      <image:caption>Không gian phòng khám đa giác quan Sensory Design by Goodlife Media</image:caption>
+    </image:image>
+  </url>
+</urlset>
