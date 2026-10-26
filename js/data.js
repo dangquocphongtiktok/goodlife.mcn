@@ -795,10 +795,8 @@ const NODES_DATA = [
         <!-- Founder Spotlight: Anh Đặng Quốc Phong -->
         <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-sky-950/30 to-slate-900 border border-sky-500/30 shadow-xl relative overflow-hidden">
           <div class="flex items-start gap-4">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-sky-400 to-teal-400 p-0.5 shrink-0 shadow-lg shadow-sky-500/30">
-              <div class="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-sky-300 font-bold text-xl font-heading">
-                QP
-              </div>
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-sky-400 to-teal-400 p-0.5 shrink-0 shadow-lg shadow-sky-500/30 overflow-hidden">
+              <img src="assets/founder-dang-quoc-phong.jpg" alt="Đặng Quốc Phong - Founder &amp; CEO Goodlife Media" class="w-full h-full rounded-full object-cover">
             </div>
             <div>
               <div class="flex items-center gap-2">
