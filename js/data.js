@@ -162,7 +162,6 @@ const NODES_DATA = [
                 <span>Gửi Yêu Cầu Tư Vấn Ngay</span>
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
               </button>
-              <p class="text-[10px] text-center text-slate-400 mt-2">Dữ liệu sẽ được gửi thẳng đến email <strong class="text-emerald-400 font-mono">goodlife.mcn@gmail.com</strong></p>
             </div>
           </form>
         </div>
