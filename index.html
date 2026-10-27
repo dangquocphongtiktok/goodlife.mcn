@@ -227,46 +227,49 @@
     <div id="labels-container" aria-label="Nhãn điều hướng 3D"></div>
 
     <!-- Minimalist Header UI (Zero Clutter) -->
-    <header class="fixed top-0 left-0 right-0 z-30 px-6 py-5 flex items-center justify-between pointer-events-none">
+    <!-- Minimalist Header UI (Zero Clutter, Fully Responsive Mobile & Desktop) -->
+    <header class="fixed top-0 left-0 right-0 z-30 px-3.5 py-3 md:px-6 md:py-5 flex items-center justify-between pointer-events-none">
       
       <!-- Top-Left: Brand & Logo -->
-      <div class="flex items-center gap-3.5 pointer-events-auto">
-        <a href="/" class="relative w-11 h-11 rounded-full overflow-hidden border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/30 group cursor-pointer transition-transform hover:scale-105 block" aria-label="Goodlife Media Trang Chủ">
+      <div class="flex items-center gap-2.5 sm:gap-3.5 pointer-events-auto shrink-0">
+        <a href="/" class="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-cyan-400/50 shadow-lg shadow-cyan-500/30 group cursor-pointer transition-transform hover:scale-105 block shrink-0" aria-label="Goodlife Media Trang Chủ">
           <img src="assets/goodlife-logo.png" alt="Goodlife Media (Good Life Media) - MCN Xây Kênh TikTok Bác Sĩ &amp; Phòng Khám" class="w-full h-full object-cover">
         </a>
         <div>
-          <div class="font-heading text-sm md:text-base font-extrabold tracking-wider text-white flex items-center gap-1.5">
+          <div class="font-heading text-xs sm:text-sm md:text-base font-extrabold tracking-wider text-white flex items-center gap-1.5 whitespace-nowrap">
             <span>GOODLIFE MEDIA</span>
-            <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#38bdf8] animate-pulse" aria-hidden="true"></span>
+            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#38bdf8] animate-pulse" aria-hidden="true"></span>
           </div>
-          <p class="text-[11px] font-bold tracking-widest uppercase text-cyan-400 font-mono">Truyền Thông Y Khoa</p>
+          <p class="text-[9px] sm:text-[11px] font-bold tracking-widest uppercase text-cyan-400 font-mono whitespace-nowrap">Truyền Thông Y Khoa</p>
         </div>
       </div>
 
-      <!-- Top-Center: Glassmorphism Pill Menu (Absolute Centered) -->
-      <div class="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
-        <nav class="glass-pill px-2.5 py-1.5 md:px-3 md:py-2 rounded-full flex items-center gap-1 md:gap-1.5" aria-label="Menu chính">
-          <button data-index="0" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all" aria-label="Xem Giới thiệu Goodlife Media">
+      <!-- Top-Center: Glassmorphism Pill Menu (Desktop: In-header; Mobile: Floating Sub-bar) -->
+      <div class="fixed top-[52px] md:top-5 left-1/2 -translate-x-1/2 z-30 pointer-events-auto max-w-[calc(100vw-16px)]">
+        <nav class="glass-pill px-2 py-1 md:px-3 md:py-2 rounded-full flex items-center gap-1 md:gap-1.5 shadow-xl" aria-label="Menu chính">
+          <button data-index="0" class="menu-item px-2.5 py-1 md:px-4 md:py-1.5 rounded-full text-[11px] md:text-sm font-semibold text-slate-200 hover:text-white transition-all whitespace-nowrap" aria-label="Xem Giới thiệu Goodlife Media">
             01. Giới thiệu
           </button>
-          <button data-index="1" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all" aria-label="Xem Dịch vụ xây kênh TikTok bác sĩ &amp; Báo giá">
-            02. Dịch vụ &amp; Báo giá
+          <button data-index="1" class="menu-item px-2.5 py-1 md:px-4 md:py-1.5 rounded-full text-[11px] md:text-sm font-semibold text-slate-200 hover:text-white transition-all whitespace-nowrap" aria-label="Xem Dịch vụ xây kênh TikTok bác sĩ &amp; Báo giá">
+            <span class="md:hidden">02. Dịch vụ</span>
+            <span class="hidden md:inline">02. Dịch vụ &amp; Báo giá</span>
           </button>
-          <button data-index="2" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all" aria-label="Xem Dịch vụ Thiết kế phòng khám Sensory Design">
-            03. Sensory Design
+          <button data-index="2" class="menu-item px-2.5 py-1 md:px-4 md:py-1.5 rounded-full text-[11px] md:text-sm font-semibold text-slate-200 hover:text-white transition-all whitespace-nowrap" aria-label="Xem Dịch vụ Thiết kế phòng khám Sensory Design">
+            <span class="md:hidden">03. Sensory</span>
+            <span class="hidden md:inline">03. Sensory Design</span>
           </button>
-          <button data-index="3" class="menu-item px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold text-slate-200 hover:text-white transition-all" aria-label="Xem Câu hỏi thường gặp FAQ">
+          <button data-index="3" class="menu-item px-2.5 py-1 md:px-4 md:py-1.5 rounded-full text-[11px] md:text-sm font-semibold text-slate-200 hover:text-white transition-all whitespace-nowrap" aria-label="Xem Câu hỏi thường gặp FAQ">
             04. FAQ
           </button>
         </nav>
       </div>
 
       <!-- Top-Right: Sleek CTA Consultation Button -->
-      <div class="pointer-events-auto flex items-center">
-        <button class="btn-open-consultation px-4 md:px-5 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wide text-white bg-slate-900/80 border-1.5 border-cyan-400/60 hover:border-cyan-300 hover:bg-cyan-500/20 shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2 cursor-pointer group" aria-label="Nhận tư vấn chiến lược xây kênh y tế">
+      <div class="pointer-events-auto flex items-center shrink-0">
+        <button class="btn-open-consultation px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-bold tracking-wide text-white bg-slate-900/80 border-1.5 border-cyan-400/60 hover:border-cyan-300 hover:bg-cyan-500/20 shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer group shrink-0" aria-label="Nhận tư vấn chiến lược xây kênh y tế">
           <span class="hidden sm:inline">Nhận tư vấn chiến lược</span>
-          <span class="sm:hidden">Tư vấn</span>
-          <svg class="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <span class="sm:hidden font-semibold whitespace-nowrap">Tư vấn</span>
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 group-hover:translate-x-1 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
           </svg>
         </button>

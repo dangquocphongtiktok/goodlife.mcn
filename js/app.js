@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateFloatingLabels() {
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const isMobile = width < 768;
     const isSidePanelOpen = sidePanel.classList.contains('open');
     const anchors = buildingScene.labelAnchors;
 
@@ -240,10 +241,47 @@ document.addEventListener('DOMContentLoaded', () => {
       const screenX = (tempVec.x * 0.5 + 0.5) * width;
       const screenY = (-(tempVec.y * 0.5) + 0.5) * height;
 
-      // Label card placement offset: to the right of the node anchor
-      const labelOffsetX = isSidePanelOpen ? 85 : 135;
-      const targetLabelX = screenX + labelOffsetX;
-      const targetLabelY = screenY;
+      // Card dimensions for bounding box and clamping
+      const cardHalfWidth = (labelEl.offsetWidth ? (labelEl.offsetWidth / 2) : (isMobile ? 55 : 75));
+      const cardHalfHeight = (labelEl.offsetHeight ? (labelEl.offsetHeight / 2) : 18);
+
+      let targetLabelX;
+      let targetLabelY = screenY;
+
+      if (isMobile) {
+        // Smart responsive placement on mobile:
+        // If anchor is on the right side of the screen (> 52% of width), place card to the LEFT
+        // If anchor is on the left side of the screen (<= 52% of width), place card to the RIGHT
+        const placeOnLeft = screenX > width * 0.52;
+        const offset = cardHalfWidth + 18;
+
+        if (placeOnLeft) {
+          targetLabelX = screenX - offset;
+        } else {
+          targetLabelX = screenX + offset;
+        }
+
+        // Clamp within viewport margins (min 10px from edges)
+        const marginX = 10;
+        const minX = cardHalfWidth + marginX;
+        const maxX = width - cardHalfWidth - marginX;
+        targetLabelX = Math.max(minX, Math.min(maxX, targetLabelX));
+
+        // Clamp Y to prevent overlapping top header / glass pill (top ~96px) and bottom floating widgets (bottom ~90px)
+        const minY = 96 + cardHalfHeight;
+        const maxY = height - 90 - cardHalfHeight;
+        targetLabelY = Math.max(minY, Math.min(maxY, targetLabelY));
+
+      } else {
+        // Desktop: offset to the right of anchor
+        const labelOffsetX = isSidePanelOpen ? 85 : 135;
+        targetLabelX = screenX + labelOffsetX;
+
+        // Clamp within viewport
+        const minX = cardHalfWidth + 16;
+        const maxX = width - cardHalfWidth - 16;
+        targetLabelX = Math.max(minX, Math.min(maxX, targetLabelX));
+      }
 
       // Visibility adjustments when drawer is open
       if (isSidePanelOpen && width < 1200) {
@@ -256,11 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       labelEl.style.transform = `translate(${targetLabelX}px, ${targetLabelY}px) translate(-50%, -50%)`;
 
-      // Update SVG line from 3D anchor to label edge
-      const cardHalfWidth = (labelEl.offsetWidth ? (labelEl.offsetWidth / 2) : 60);
+      // Update SVG line from 3D anchor to label card edge
+      const lineEndX = targetLabelX > screenX ? (targetLabelX - cardHalfWidth) : (targetLabelX + cardHalfWidth);
       lineEl.setAttribute('x1', screenX);
       lineEl.setAttribute('y1', screenY);
-      lineEl.setAttribute('x2', targetLabelX - cardHalfWidth);
+      lineEl.setAttribute('x2', lineEndX);
       lineEl.setAttribute('y2', targetLabelY);
     });
   }

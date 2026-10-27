@@ -26,11 +26,15 @@ class BuildingScene {
     // Deep medical biotech space fog (#030E1A)
     this.scene.fog = new THREE.FogExp2(0x030e1a, 0.024);
 
+    const isMobile = window.innerWidth < 768;
     const aspect = window.innerWidth / window.innerHeight;
     this.camera = new THREE.PerspectiveCamera(42, aspect, 0.1, 100);
 
     // Dynamic isometric golden viewing perspective for the vertical DNA helix
-    this.initialCameraPos = new THREE.Vector3(3.2, 0.6, 9.2);
+    // On mobile, position camera slightly further back so helix and all 4 nodes fit comfortably
+    this.initialCameraPos = isMobile
+      ? new THREE.Vector3(2.4, 0.3, 11.2)
+      : new THREE.Vector3(3.2, 0.6, 9.2);
     this.camera.position.copy(this.initialCameraPos);
 
     this.initialTarget = new THREE.Vector3(0, 0, 0);
@@ -145,6 +149,13 @@ class BuildingScene {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const isMobile = width < 768;
+      this.initialCameraPos.set(
+        isMobile ? 2.4 : 3.2,
+        isMobile ? 0.3 : 0.6,
+        isMobile ? 11.2 : 9.2
+      );
     });
   }
 

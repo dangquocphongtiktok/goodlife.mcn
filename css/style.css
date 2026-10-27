@@ -85,6 +85,7 @@ h1, h2, h3, h4, h5, .font-heading {
   color: #cbd5e1;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .menu-item:hover {
@@ -676,6 +677,28 @@ h1, h2, h3, h4, h5, .font-heading {
 
 /* Mobile responsiveness: compact circle badge on very small screens */
 @media (max-width: 640px) {
+  /* Compact header pill and menu items on mobile */
+  .glass-pill {
+    padding: 3px 6px;
+  }
+  .menu-item {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+  
+  /* Floating 3D label cards compact mobile appearance */
+  .label-card {
+    padding: 5px 10px;
+    gap: 5px;
+  }
+  .label-card span {
+    font-size: 11px !important;
+  }
+  .label-indicator {
+    width: 7px;
+    height: 7px;
+  }
+
   .tiktok-floating-widget {
     bottom: 84px;
     right: 16px;

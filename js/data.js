@@ -179,7 +179,7 @@ const NODES_DATA = [
     title: "03. Thiết Kế Sensory Design Cho Phòng Khám",
     floatingLabel: "03. Thiết Kế Sensory Design Cho Phòng Khám",
     prefixNum: "03.",
-    labelTitle: "Thiết Kế Sensory Design Cho Phòng Khám",
+    labelTitle: "Sensory Design",
     nodeLabel: "03. Sensory Design",
     buildingLabel: "03. Sensory Design",
     subtitle: "Thiết kế Ánh sáng, Mùi hương, Âm thanh & Phần nhìn — Xóa bỏ căng thẳng khi đi khám",
