@@ -1,0 +1,21 @@
+{
+  "name": "Goodlife Media - Truyền Thông Y Khoa",
+  "short_name": "Goodlife Media",
+  "description": "Goodlife Media (Good Life Media) - MCN đối tác TikTok tại Việt Nam chuyên xây kênh TikTok bác sĩ, phòng khám & thiết kế phòng khám",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#041322",
+  "background_color": "#041322",
+  "display": "standalone",
+  "start_url": "/"
+}
