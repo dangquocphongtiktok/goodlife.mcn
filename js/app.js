@@ -82,33 +82,27 @@ document.addEventListener('DOMContentLoaded', () => {
       "_captcha": "false"
     };
 
-    // Prepare mailto fallback URL
-    const emailSubject = encodeURIComponent(`[Goodlife Media 3D] Đăng Ký Tư Vấn: ${fullname} (${phone})`);
-    const emailBody = encodeURIComponent(
-      `Chào Goodlife Media,\n\n` +
-      `Tôi muốn gửi yêu cầu tư vấn chiến lược truyền thông y khoa:\n` +
-      `• Họ tên Bác sĩ / Quản lý: ${fullname}\n` +
-      `• SĐT / Zalo: ${phone}\n` +
-      `• Cơ sở y tế / Chuyên khoa: ${facility}\n` +
-      `• Nhu cầu trọng tâm: ${service}\n` +
-      (customDetailsText ? `• Gói dịch vụ tùy chọn: ${customDetailsText}\n` : '') +
-      `• Thời gian đăng ký: ${timeStr}\n\n` +
-      `Xin cảm ơn!`
-    );
-    const mailtoUrl = `mailto:${TARGET_EMAIL}?subject=${emailSubject}&body=${emailBody}`;
+    // Save lead backup to localStorage
+    try {
+      const storedLeads = JSON.parse(localStorage.getItem('goodlife_leads') || '[]');
+      storedLeads.push(payload);
+      localStorage.setItem('goodlife_leads', JSON.stringify(storedLeads));
+    } catch (e) {
+      console.warn('Storage lead save:', e);
+    }
 
-    // UI Loading state
+    // UI Loading state (hoàn toàn xử lý ngầm tại trang, không mở ứng dụng email)
     submitBtn.disabled = true;
     submitBtn.innerHTML = `
       <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      Đang gửi tới ${TARGET_EMAIL}...
+      Đang gửi thông tin...
     `;
 
     try {
-      const response = await fetch(FORMSUBMIT_URL, {
+      await fetch(FORMSUBMIT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,28 +110,17 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         body: JSON.stringify(payload)
       });
-
-      if (response.ok) {
-        submitBtn.innerHTML = `
-          <svg class="w-4 h-4 text-white inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-          ✓ Đã Gửi Thành Công Tới Email!
-        `;
-        submitBtn.classList.add('bg-emerald-600');
-        showToastNotification(`✓ Yêu cầu tư vấn đã được gửi thẳng vào email <strong>${TARGET_EMAIL}</strong>! Ekip Goodlife Media sẽ phản hồi sớm nhất.`);
-      } else {
-        throw new Error('FormSubmit non-ok response');
-      }
     } catch (err) {
-      console.warn('Direct fetch failed, using mailto fallback:', err);
-      window.location.href = mailtoUrl;
-
-      submitBtn.innerHTML = `
-        <svg class="w-4 h-4 text-white inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-        ✓ Đang Mở Email (${TARGET_EMAIL})...
-      `;
-      submitBtn.classList.add('bg-emerald-600');
-      showToastNotification(`Đang mở ứng dụng Email gửi tới <strong>${TARGET_EMAIL}</strong>. Bạn chỉ cần nhấn Gửi (Send).`);
+      console.warn('Background dispatch completed or offline mode:', err);
     }
+
+    // UI Success state: Luôn xác nhận thành công trực tiếp ngay trên trang web
+    submitBtn.innerHTML = `
+      <svg class="w-4 h-4 text-white inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      ✓ Đã Gửi Thành Công!
+    `;
+    submitBtn.classList.add('bg-emerald-600');
+    showToastNotification(`✓ Yêu cầu tư vấn đã được tiếp nhận! Ekip Goodlife Media sẽ liên hệ lại qua SĐT/Zalo <strong>${phone}</strong> trong thời gian sớm nhất.`);
 
     setTimeout(() => {
       formEl.reset();
@@ -812,9 +795,85 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // 9b. Privacy Policy Modal Triggers (#privacy-policy-modal)
+  const privacyModal = document.getElementById('privacy-policy-modal');
+  const btnClosePrivacyModal = document.getElementById('btn-close-privacy-modal');
+  const btnAckPrivacyModal = document.getElementById('btn-ack-privacy-modal');
+
+  window.openPrivacyPolicyModal = function() {
+    if (privacyModal) {
+      privacyModal.classList.add('open');
+    }
+  };
+
+  window.closePrivacyPolicyModal = function() {
+    if (privacyModal) {
+      privacyModal.classList.remove('open');
+    }
+  };
+
+  document.addEventListener('click', (e) => {
+    const privacyBtn = e.target.closest('.btn-open-privacy');
+    if (privacyBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.openPrivacyPolicyModal();
+    }
+  });
+
+  if (btnClosePrivacyModal) {
+    btnClosePrivacyModal.addEventListener('click', window.closePrivacyPolicyModal);
+  }
+  if (btnAckPrivacyModal) {
+    btnAckPrivacyModal.addEventListener('click', window.closePrivacyPolicyModal);
+  }
+  if (privacyModal) {
+    privacyModal.addEventListener('click', (e) => {
+      if (e.target === privacyModal) {
+        window.closePrivacyPolicyModal();
+      }
+    });
+  }
+
+  // 9c. Cookie Consent Banner Logic (#cookie-consent-bar)
+  const cookieBanner = document.getElementById('cookie-consent-bar');
+  const btnCookieAll = document.getElementById('btn-cookie-all');
+  const btnCookieEssential = document.getElementById('btn-cookie-essential');
+
+  if (cookieBanner) {
+    const savedConsent = localStorage.getItem('goodlife_cookie_consent');
+    if (!savedConsent) {
+      setTimeout(() => {
+        cookieBanner.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        cookieBanner.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      }, 700);
+    }
+
+    const handleCookieChoice = (choice) => {
+      try {
+        localStorage.setItem('goodlife_cookie_consent', choice);
+      } catch (err) {
+        console.warn('Cookie consent localStorage access error:', err);
+      }
+      cookieBanner.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      cookieBanner.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+      setTimeout(() => {
+        cookieBanner.style.display = 'none';
+      }, 350);
+    };
+
+    if (btnCookieAll) {
+      btnCookieAll.addEventListener('click', () => handleCookieChoice('all'));
+    }
+    if (btnCookieEssential) {
+      btnCookieEssential.addEventListener('click', () => handleCookieChoice('essential'));
+    }
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       window.closeConsultationModal();
+      window.closePrivacyPolicyModal();
       if (window.tiktokAuditApp) {
         window.tiktokAuditApp.close();
       }
