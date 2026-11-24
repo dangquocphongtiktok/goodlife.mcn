@@ -881,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCopyLawSummary = document.getElementById('btn-copy-law-summary');
   const btnCopyCabinetChecklist = document.getElementById('btn-copy-cabinet-checklist');
 
-  window.openMedicalAdLawModal = function(tabKey = 'overview') {
+  window.openMedicalAdLawModal = function(tabKey = 'q1') {
     if (adLawModal) {
       adLawModal.classList.add('open');
       document.body.classList.add('overflow-hidden');
@@ -922,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.btn-open-ad-law').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      window.openMedicalAdLawModal();
+      window.openMedicalAdLawModal('q1');
     });
   });
 
@@ -961,20 +961,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Copy Executive Law Summary
+  // Copy Executive Law Summary (4 Questions)
   if (btnCopyLawSummary) {
     btnCopyLawSummary.addEventListener('click', () => {
-      const summaryText = `[CẨM NANG PHÁP LÝ QUẢNG CÁO PHÒNG KHÁM 2026 - GOODLIFE MEDIA]
-1. Bước ngoặt 2026: Chính thức bãi bỏ thủ tục xin Giấy xác nhận nội dung quảng cáo KCB từ 15/02/2026 (NĐ 342/2025/NĐ-CP & TT 03/2026/TT-BYT). Chuyển sang cơ chế TỰ BẢO ĐẢM NỘI DUNG + HẬU KIỂM ĐỘT XUẤT.
-2. 05 Thông tin bắt buộc trên mọi ấn phẩm: (1) Tên đầy đủ khớp GPHĐ; (2) Địa chỉ từng chi nhánh; (3) Số GPHĐ; (4) Thời gian hoạt động; (5) Phạm vi chuyên môn trong Danh mục kỹ thuật được duyệt (TT 23/2024).
-3. Vùng cấm: Tuyệt đối không dùng chữ thập đỏ trên biển hiệu; cấm từ "nhất", "số 1", "cam kết 100%"; CẤM bác sĩ mặc áo blouse trắng quảng cáo mỹ phẩm, thực phẩm chức năng.
-4. Chế tài từ 15/05/2026 (NĐ 87/2026 & NĐ 90/2026): Phạt tổ chức tới 200 triệu; tước GPHĐ từ 1–6 tháng (hoặc đến 24 tháng); TRUY THU toàn bộ số lợi bất hợp pháp theo GIÁ BÁN dịch vụ từ ngày quảng cáo vi phạm; phạt riêng KOL 40–100 triệu.
-5. Mốc bắt buộc: Kê đơn điện tử (01/01/2026 - TT 26/2025); Hồ sơ bệnh án điện tử EMR (hạn chót 31/12/2026 - TT 13/2025); Bộ chuẩn Có/Không (01/01/2027 - TT 46/2026).
-Hotline hỗ trợ tư vấn 1:1: 0918 600 310 (Goodlife Media)`;
+      const summaryText = `[HỒ SƠ HẬU KIỂM & QUY CHUẨN QUẢNG CÁO PHÒNG KHÁM 2026 - GOODLIFE MEDIA]
+1. Luật thay đổi thế nào từ 2026?
+- Bãi bỏ xin Giấy xác nhận quảng cáo KCB từ 15/02/2026 (NĐ 342/2025 & TT 03/2026).
+- Chuyển sang: Tự chịu trách nhiệm + Hậu kiểm đột xuất + Phạt đầu ra cực nặng.
+- Phạt tổ chức tới 200 triệu, tước GPHĐ 01-06 tháng (hoặc đến 24 tháng), TRUY THU toàn bộ doanh thu dịch vụ theo GIÁ BÁN. Phạt KOL 40-100 triệu.
+
+2. Cần né gì khi làm Organic (Tự nhiên)?
+- Né lồng ghép bán hàng, bảng giá ưu đãi, lời mời đặt lịch vào video giáo dục sức khỏe.
+- Tuyệt đối cấm bác sĩ mặc áo blouse trắng review mỹ phẩm / thực phẩm chức năng.
+- Né đăng ảnh/video ca bệnh khi chưa có văn bản đồng ý ký tay; không cam kết dứt điểm 100%.
+- Bác sĩ lên sóng đại diện phòng khám bắt buộc phải nằm trong Danh sách đăng ký hành nghề tại cơ sở.
+
+3. Cần né gì khi chạy Paid Ads?
+- Né chạy khi chưa có GPHĐ hoặc thủ thuật chưa nằm trong Danh mục kỹ thuật được duyệt.
+- Bắt buộc đủ 5 thông tin: Tên PK, Địa chỉ, Số GPHĐ, Giờ làm việc, Phạm vi chuyên môn (Thiếu 1 mục: phạt 30-40tr + tước GPHĐ 1-3 tháng).
+- Chữ không được nhỏ hơn chữ quảng cáo, màu tương phản; video đọc rõ khuyến cáo bằng âm lượng chính.
+- Né từ cấm: "nhất", "số 1", "đặc trị", "chữa khỏi 100%". KOL phải dùng thật và thông báo rõ bài quảng cáo.
+- Thực phẩm chức năng vẫn bắt buộc tiền kiểm; cấm quảng cáo thuốc kê đơn (ETC).
+
+4. Khi thanh tra xuống thì kiểm tra gì & chuẩn bị gì?
+- Kiểm tra chéo 4 nguồn: Hồ sơ gốc • Thực tế ca trực • Cổng dữ liệu điện tử (Đơn thuốc điện tử & EMR hạn 31/12/2026) • Quảng cáo trên mạng.
+- Luôn sẵn sàng: Quy trình ứng phó 3 bước (Xác minh đoàn, 1 đầu mối làm việc, quyền Admin gỡ bài dưới 24h) + Tủ hồ sơ hậu kiểm 6 Trụ cột (Pháp lý, Nhân sự/CME, Chuyên môn/Cấp cứu, Chuyển đổi số, KSNK/PCCC, Hồ sơ quảng cáo lưu 3 năm).
+
+Hotline tư vấn chiến lược y khoa 1:1 cùng Founder Đặng Quốc Phong: 0918 600 310`;
       
       navigator.clipboard.writeText(summaryText).then(() => {
         const origText = btnCopyLawSummary.innerHTML;
-        btnCopyLawSummary.innerHTML = '<span>✅</span><span>Đã sao chép!</span>';
+        btnCopyLawSummary.innerHTML = '<span>✅</span><span>Đã sao chép 4 câu!</span>';
         setTimeout(() => {
           btnCopyLawSummary.innerHTML = origText;
         }, 2000);
