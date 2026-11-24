@@ -507,6 +507,8 @@ document.addEventListener('DOMContentLoaded', () => {
           selectDropdown.value = 'Gói Truyền Thông Trọn Gói 25 triệu/tháng (30 video + MCN + Ads)';
         } else if (serviceName.includes('15')) {
           selectDropdown.value = 'Gói Truyền Thông Tiêu Chuẩn 15 triệu/tháng (30 video + MCN)';
+        } else if (serviceName.includes('pháp lý') || serviceName.includes('Phong')) {
+          selectDropdown.value = 'Tư vấn pháp lý y tế & Chiến lược cùng Founder Đặng Quốc Phong';
         }
       }
     };
@@ -870,10 +872,146 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 9d. Medical Advertising Law Modal (#modal-medical-ad-law)
+  const adLawModal = document.getElementById('modal-medical-ad-law');
+  const btnCloseAdLaw = document.getElementById('btn-close-ad-law');
+  const btnBottomCloseAdLaw = document.getElementById('btn-bottom-close-ad-law');
+  const lawTabBtns = document.querySelectorAll('[data-law-tab]');
+  const lawPanes = document.querySelectorAll('.law-tab-pane');
+  const btnCopyLawSummary = document.getElementById('btn-copy-law-summary');
+  const btnCopyCabinetChecklist = document.getElementById('btn-copy-cabinet-checklist');
+
+  window.openMedicalAdLawModal = function(tabKey = 'overview') {
+    if (adLawModal) {
+      adLawModal.classList.add('open');
+      document.body.classList.add('overflow-hidden');
+      if (tabKey) {
+        window.switchMedicalAdLawTab(tabKey);
+      }
+    }
+  };
+
+  window.closeMedicalAdLawModal = function() {
+    if (adLawModal) {
+      adLawModal.classList.remove('open');
+      document.body.classList.remove('overflow-hidden');
+    }
+  };
+
+  window.switchMedicalAdLawTab = function(tabKey) {
+    lawTabBtns.forEach(btn => {
+      const isActive = btn.getAttribute('data-law-tab') === tabKey;
+      btn.classList.toggle('active', isActive);
+      if (isActive) {
+        btn.classList.remove('text-slate-400');
+      } else {
+        btn.classList.add('text-slate-400');
+      }
+    });
+
+    lawPanes.forEach(pane => {
+      if (pane.id === `law-pane-${tabKey}`) {
+        pane.classList.remove('hidden');
+      } else {
+        pane.classList.add('hidden');
+      }
+    });
+  };
+
+  // Open triggers for Medical Ad Law
+  document.querySelectorAll('.btn-open-ad-law').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.openMedicalAdLawModal();
+    });
+  });
+
+  // Close triggers
+  if (btnCloseAdLaw) {
+    btnCloseAdLaw.addEventListener('click', window.closeMedicalAdLawModal);
+  }
+  if (btnBottomCloseAdLaw) {
+    btnBottomCloseAdLaw.addEventListener('click', window.closeMedicalAdLawModal);
+  }
+  if (adLawModal) {
+    adLawModal.addEventListener('click', (e) => {
+      if (e.target === adLawModal) {
+        window.closeMedicalAdLawModal();
+      }
+    });
+  }
+
+  // Tab switching
+  lawTabBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const tabKey = btn.getAttribute('data-law-tab');
+      window.switchMedicalAdLawTab(tabKey);
+    });
+  });
+
+  // CTA triggers from Law modal to Consultation Modal
+  document.querySelectorAll('.btn-ad-law-cta-consult').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.closeMedicalAdLawModal();
+      setTimeout(() => {
+        window.openConsultationModalWithService('Tư vấn pháp lý y tế & Chiến lược cùng Founder Đặng Quốc Phong');
+      }, 200);
+    });
+  });
+
+  // Copy Executive Law Summary
+  if (btnCopyLawSummary) {
+    btnCopyLawSummary.addEventListener('click', () => {
+      const summaryText = `[CẨM NANG PHÁP LÝ QUẢNG CÁO PHÒNG KHÁM 2026 - GOODLIFE MEDIA]
+1. Bước ngoặt 2026: Chính thức bãi bỏ thủ tục xin Giấy xác nhận nội dung quảng cáo KCB từ 15/02/2026 (NĐ 342/2025/NĐ-CP & TT 03/2026/TT-BYT). Chuyển sang cơ chế TỰ BẢO ĐẢM NỘI DUNG + HẬU KIỂM ĐỘT XUẤT.
+2. 05 Thông tin bắt buộc trên mọi ấn phẩm: (1) Tên đầy đủ khớp GPHĐ; (2) Địa chỉ từng chi nhánh; (3) Số GPHĐ; (4) Thời gian hoạt động; (5) Phạm vi chuyên môn trong Danh mục kỹ thuật được duyệt (TT 23/2024).
+3. Vùng cấm: Tuyệt đối không dùng chữ thập đỏ trên biển hiệu; cấm từ "nhất", "số 1", "cam kết 100%"; CẤM bác sĩ mặc áo blouse trắng quảng cáo mỹ phẩm, thực phẩm chức năng.
+4. Chế tài từ 15/05/2026 (NĐ 87/2026 & NĐ 90/2026): Phạt tổ chức tới 200 triệu; tước GPHĐ từ 1–6 tháng (hoặc đến 24 tháng); TRUY THU toàn bộ số lợi bất hợp pháp theo GIÁ BÁN dịch vụ từ ngày quảng cáo vi phạm; phạt riêng KOL 40–100 triệu.
+5. Mốc bắt buộc: Kê đơn điện tử (01/01/2026 - TT 26/2025); Hồ sơ bệnh án điện tử EMR (hạn chót 31/12/2026 - TT 13/2025); Bộ chuẩn Có/Không (01/01/2027 - TT 46/2026).
+Hotline hỗ trợ tư vấn 1:1: 0918 600 310 (Goodlife Media)`;
+      
+      navigator.clipboard.writeText(summaryText).then(() => {
+        const origText = btnCopyLawSummary.innerHTML;
+        btnCopyLawSummary.innerHTML = '<span>✅</span><span>Đã sao chép!</span>';
+        setTimeout(() => {
+          btnCopyLawSummary.innerHTML = origText;
+        }, 2000);
+      }).catch(err => {
+        console.warn('Clipboard write failed:', err);
+      });
+    });
+  }
+
+  // Copy 6 Pillars Cabinet Checklist
+  if (btnCopyCabinetChecklist) {
+    btnCopyCabinetChecklist.addEventListener('click', () => {
+      const checklistText = `[TỦ HỒ SƠ HẬU KIỂM PHÒNG KHÁM 6 TRỤ CỘT - CHUẨN 2026]
+Trụ cột 1 - Pháp lý cơ sở: GPHĐ gốc/sao công chứng, ĐKKD, Quyết định phê duyệt Danh mục kỹ thuật (TT 23/2024); biển tên khoa/phòng khớp 100% GPHĐ; Bảng giá niêm yết tại quầy và website/hóa đơn.
+Trụ cột 2 - Nhân sự & CME: Hồ sơ riêng từng bác sĩ (GPHN, HĐLĐ, quyết định phân công); Danh sách đăng ký hành nghề Mẫu 01 NĐ 96/2023 đã công bố Sở Y tế; Báo giảm nghỉ việc trong 3 ngày, báo tăng/thử việc trong 10 ngày; Chứng chỉ 120h CME/5 năm (TT 32/2023); Phiên dịch y khoa có phép.
+Trụ cột 3 - Chuyên môn & An toàn: Phác đồ chẩn đoán, điều trị của Bộ Y tế; Phiếu cam kết phẫu thuật/thủ thuật Informed Consent có chữ ký người bệnh; Sơ đồ chống sốc phản vệ treo tường khổ lớn, hộp thuốc cấp cứu còn hạn (TT 51/2017); Nhật ký bảo dưỡng, kiểm định máy móc; Hợp đồng cấp cứu 115.
+Trụ cột 4 - Chuyển đổi số y tế: Kê đơn thuốc điện tử mã 14 ký tự ký số (TT 26/2025); Bệnh án điện tử EMR (hạn 31/12/2026 - TT 13/2025) gắn CCCD và backup độc lập; Quy chế bảo vệ dữ liệu sức khỏe cá nhân (Luật 91/2025).
+Trụ cột 5 - An toàn kỹ thuật: Quy trình tiệt khuẩn QĐ 3671; Sổ theo dõi tiệt khuẩn; Hợp đồng rác y tế (lưu ≤ 2 ngày); Hệ thống xử lý nước thải đạt QCVN; Hồ sơ PCCC (Luật 55/2024); Giấy phép bức xạ máy X-quang.
+Trụ cột 6 - Hồ sơ quảng cáo (Lưu 03 năm): Toàn bộ maquette, video, kịch bản, ảnh bài đăng, URL; Phiếu duyệt của Người chịu trách nhiệm chuyên môn; Hợp đồng Agency/KOL cam kết gỡ bài 24h; Văn bản đồng ý có chữ ký người bệnh dùng hình ảnh ca bệnh.`;
+      
+      navigator.clipboard.writeText(checklistText).then(() => {
+        const origText = btnCopyCabinetChecklist.innerHTML;
+        btnCopyCabinetChecklist.innerHTML = '<span>✅</span><span>Đã sao chép Checklist!</span>';
+        setTimeout(() => {
+          btnCopyCabinetChecklist.innerHTML = origText;
+        }, 2000);
+      }).catch(err => {
+        console.warn('Clipboard write failed:', err);
+      });
+    });
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       window.closeConsultationModal();
       window.closePrivacyPolicyModal();
+      window.closeMedicalAdLawModal();
       if (window.tiktokAuditApp) {
         window.tiktokAuditApp.close();
       }
