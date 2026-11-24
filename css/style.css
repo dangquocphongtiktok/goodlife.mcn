@@ -454,7 +454,7 @@ h1, h2, h3, h4, h5, .font-heading {
   align-items: center;
   text-decoration: none;
   cursor: pointer;
-  animation: float-fab 3.2s ease-in-out infinite;
+  animation: float-fab-unified 3.6s ease-in-out infinite;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
   user-select: none;
 }
@@ -467,7 +467,7 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .zalo-floating-widget:hover {
-  transform: translateY(-6px) scale(1.04);
+  transform: translateY(-5px);
 }
 
 /* Pulsing Radar Ring Effects */
@@ -569,14 +569,18 @@ h1, h2, h3, h4, h5, .font-heading {
   line-height: 1.25;
 }
 
-/* Floating Animation Keyframes */
-@keyframes float-fab {
+/* Unified Floating Animation Keyframes (Đồng bộ nhịp float cho cả 3 nút) */
+@keyframes float-fab-unified {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-7px);
+    transform: translateY(-5px);
   }
+}
+@keyframes float-fab {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 @keyframes zalo-ripple {
@@ -607,7 +611,7 @@ h1, h2, h3, h4, h5, .font-heading {
   border: none;
   background: transparent;
   cursor: pointer;
-  animation: float-fab-law 4.2s ease-in-out infinite;
+  animation: float-fab-unified 3.6s ease-in-out infinite;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
   user-select: none;
   padding: 0;
@@ -615,14 +619,14 @@ h1, h2, h3, h4, h5, .font-heading {
 
 @media (min-width: 768px) {
   .law-floating-widget {
-    bottom: 176px;
+    bottom: 172px;
     right: 28px;
     left: auto;
   }
 }
 
 .law-floating-widget:hover {
-  transform: translateY(-6px) scale(1.04);
+  transform: translateY(-5px);
 }
 
 /* Pulsing Radar Ring Effects (Amber / Gold) */
@@ -650,7 +654,7 @@ h1, h2, h3, h4, h5, .font-heading {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 256px;
+  width: 236px;
   box-sizing: border-box;
   padding: 6px 18px 6px 6px;
   border-radius: 9999px;
@@ -712,28 +716,24 @@ h1, h2, h3, h4, h5, .font-heading {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #fbbf24;
+  color: #94a3b8;
   line-height: 1.2;
 }
 
 .law-widget-title {
   font-family: 'Outfit', 'Plus Jakarta Sans', monospace;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
-  color: #fef3c7;
-  letter-spacing: 0.01em;
+  color: #fbbf24;
+  letter-spacing: 0.02em;
   text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
   line-height: 1.25;
   white-space: nowrap;
 }
 
 @keyframes float-fab-law {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 /* ============================================================
@@ -750,18 +750,13 @@ h1, h2, h3, h4, h5, .font-heading {
   border: none;
   background: transparent;
   cursor: pointer;
-  animation: float-fab-tiktok 3.6s ease-in-out infinite;
+  animation: float-fab-unified 3.6s ease-in-out infinite;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
   user-select: none;
   padding: 0;
 }
 
 @media (min-width: 768px) {
-  .law-floating-widget {
-    bottom: 176px;
-    right: 28px;
-    left: auto;
-  }
   .tiktok-floating-widget {
     bottom: 100px;
     right: 28px;
@@ -770,7 +765,7 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .tiktok-floating-widget:hover {
-  transform: translateY(-6px) scale(1.04);
+  transform: translateY(-5px);
 }
 
 /* Pulsing Radar Ring Effects */
@@ -876,12 +871,8 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 @keyframes float-fab-tiktok {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-7px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 /* Mobile responsiveness: compact circle badge on very small screens */
