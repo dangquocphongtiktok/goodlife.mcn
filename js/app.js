@@ -881,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCopyLawSummary = document.getElementById('btn-copy-law-summary');
   const btnCopyCabinetChecklist = document.getElementById('btn-copy-cabinet-checklist');
 
-  window.openMedicalAdLawModal = function(tabKey = 'q1') {
+  window.openMedicalAdLawModal = function(tabKey = 'law2026') {
     if (adLawModal) {
       adLawModal.classList.add('open');
       document.body.classList.add('overflow-hidden');
@@ -922,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.btn-open-ad-law').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      window.openMedicalAdLawModal('q1');
+      window.openMedicalAdLawModal('law2026');
     });
   });
 
@@ -985,7 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 4. Khi thanh tra xuống thì kiểm tra gì & chuẩn bị gì?
 - Kiểm tra chéo 4 nguồn: Hồ sơ gốc • Thực tế ca trực • Cổng dữ liệu điện tử (Đơn thuốc điện tử & EMR hạn 31/12/2026) • Quảng cáo trên mạng.
-- Luôn sẵn sàng: Quy trình ứng phó 3 bước (Xác minh đoàn, 1 đầu mối làm việc, quyền Admin gỡ bài dưới 24h) + Tủ hồ sơ hậu kiểm 6 Trụ cột (Pháp lý, Nhân sự/CME, Chuyên môn/Cấp cứu, Chuyển đổi số, KSNK/PCCC, Hồ sơ quảng cáo lưu 3 năm).
+- Luôn sẵn sàng: Quy trình ứng phó 3 bước (Xác minh đoàn, 1 đầu mối làm việc, quyền Admin gỡ bài dưới 24h) + Danh sách 6 bộ hồ sơ giấy tờ cần chuẩn bị sẵn (Pháp lý, Nhân sự/CME, Chuyên môn/Cấp cứu, Chuyển đổi số, KSNK/PCCC, Hồ sơ quảng cáo lưu 3 năm).
 
 Hotline tư vấn chiến lược y khoa 1:1 cùng Founder Đặng Quốc Phong: 0918 600 310`;
       
@@ -1001,16 +1001,16 @@ Hotline tư vấn chiến lược y khoa 1:1 cùng Founder Đặng Quốc Phong:
     });
   }
 
-  // Copy 6 Pillars Cabinet Checklist
+  // Copy 6 Sets of Records Checklist
   if (btnCopyCabinetChecklist) {
     btnCopyCabinetChecklist.addEventListener('click', () => {
-      const checklistText = `[TỦ HỒ SƠ HẬU KIỂM PHÒNG KHÁM 6 TRỤ CỘT - CHUẨN 2026]
-Trụ cột 1 - Pháp lý cơ sở: GPHĐ gốc/sao công chứng, ĐKKD, Quyết định phê duyệt Danh mục kỹ thuật (TT 23/2024); biển tên khoa/phòng khớp 100% GPHĐ; Bảng giá niêm yết tại quầy và website/hóa đơn.
-Trụ cột 2 - Nhân sự & CME: Hồ sơ riêng từng bác sĩ (GPHN, HĐLĐ, quyết định phân công); Danh sách đăng ký hành nghề Mẫu 01 NĐ 96/2023 đã công bố Sở Y tế; Báo giảm nghỉ việc trong 3 ngày, báo tăng/thử việc trong 10 ngày; Chứng chỉ 120h CME/5 năm (TT 32/2023); Phiên dịch y khoa có phép.
-Trụ cột 3 - Chuyên môn & An toàn: Phác đồ chẩn đoán, điều trị của Bộ Y tế; Phiếu cam kết phẫu thuật/thủ thuật Informed Consent có chữ ký người bệnh; Sơ đồ chống sốc phản vệ treo tường khổ lớn, hộp thuốc cấp cứu còn hạn (TT 51/2017); Nhật ký bảo dưỡng, kiểm định máy móc; Hợp đồng cấp cứu 115.
-Trụ cột 4 - Chuyển đổi số y tế: Kê đơn thuốc điện tử mã 14 ký tự ký số (TT 26/2025); Bệnh án điện tử EMR (hạn 31/12/2026 - TT 13/2025) gắn CCCD và backup độc lập; Quy chế bảo vệ dữ liệu sức khỏe cá nhân (Luật 91/2025).
-Trụ cột 5 - An toàn kỹ thuật: Quy trình tiệt khuẩn QĐ 3671; Sổ theo dõi tiệt khuẩn; Hợp đồng rác y tế (lưu ≤ 2 ngày); Hệ thống xử lý nước thải đạt QCVN; Hồ sơ PCCC (Luật 55/2024); Giấy phép bức xạ máy X-quang.
-Trụ cột 6 - Hồ sơ quảng cáo (Lưu 03 năm): Toàn bộ maquette, video, kịch bản, ảnh bài đăng, URL; Phiếu duyệt của Người chịu trách nhiệm chuyên môn; Hợp đồng Agency/KOL cam kết gỡ bài 24h; Văn bản đồng ý có chữ ký người bệnh dùng hình ảnh ca bệnh.`;
+      const checklistText = `[DANH SÁCH 6 BỘ HỒ SƠ GIẤY TỜ PHÒNG KHÁM CẦN CHUẨN BỊ SẴN - CHUẨN 2026]
+Bộ 1 - Pháp lý cơ sở: GPHĐ gốc/sao công chứng, ĐKKD, Quyết định phê duyệt Danh mục kỹ thuật (TT 23/2024); biển tên khoa/phòng khớp 100% GPHĐ; Bảng giá niêm yết tại quầy và website/hóa đơn.
+Bộ 2 - Nhân sự & CME: Hồ sơ riêng từng bác sĩ (GPHN, HĐLĐ, quyết định phân công); Danh sách đăng ký hành nghề Mẫu 01 NĐ 96/2023 đã công bố Sở Y tế; Báo giảm nghỉ việc trong 3 ngày, báo tăng/thử việc trong 10 ngày; Chứng chỉ 120h CME/5 năm (TT 32/2023); Phiên dịch y khoa có phép.
+Bộ 3 - Chuyên môn & An toàn: Phác đồ chẩn đoán, điều trị của Bộ Y tế; Phiếu cam kết phẫu thuật/thủ thuật Informed Consent có chữ ký người bệnh; Sơ đồ chống sốc phản vệ treo tường khổ lớn, hộp thuốc cấp cứu còn hạn (TT 51/2017); Nhật ký bảo dưỡng, kiểm định máy móc; Hợp đồng cấp cứu 115.
+Bộ 4 - Chuyển đổi số y tế: Kê đơn thuốc điện tử mã 14 ký tự ký số (TT 26/2025); Bệnh án điện tử EMR (hạn 31/12/2026 - TT 13/2025) gắn CCCD và backup độc lập; Quy chế bảo vệ dữ liệu sức khỏe cá nhân (Luật 91/2025).
+Bộ 5 - Vệ sinh & An toàn kỹ thuật: Quy trình tiệt khuẩn QĐ 3671; Sổ theo dõi tiệt khuẩn; Hợp đồng rác y tế (lưu ≤ 2 ngày); Hệ thống xử lý nước thải đạt QCVN; Hồ sơ PCCC (Luật 55/2024); Giấy phép bức xạ máy X-quang.
+Bộ 6 - Hồ sơ quảng cáo (Lưu 03 năm): Toàn bộ maquette, video, kịch bản, ảnh bài đăng, URL; Phiếu duyệt của Người chịu trách nhiệm chuyên môn; Hợp đồng Agency/KOL cam kết gỡ bài 24h; Văn bản đồng ý có chữ ký người bệnh dùng hình ảnh ca bệnh.`;
       
       navigator.clipboard.writeText(checklistText).then(() => {
         const origText = btnCopyCabinetChecklist.innerHTML;
