@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       labelDiv.innerHTML = `
         <div class="label-card" style="--node-accent: ${data.accentColor};">
           <div class="label-indicator" style="background-color: ${data.accentColor}; box-shadow: 0 0 12px 2px ${data.accentColor};"></div>
-          <span class="font-mono font-black text-sm md:text-base mr-1 tracking-tight" style="color: ${data.accentColor}; text-shadow: 0 0 12px ${data.accentColor}90;">${data.prefixNum}</span>
+          ${data.prefixNum ? `<span class="font-mono font-black text-sm md:text-base mr-1 tracking-tight" style="color: ${data.accentColor}; text-shadow: 0 0 12px ${data.accentColor}90;">${data.prefixNum}</span>` : ''}
           <span class="text-xs md:text-sm font-extrabold tracking-wide" style="color: ${data.accentColor}; text-shadow: 0 0 12px ${data.accentColor}60, 0 1px 3px rgba(0,0,0,0.9);">${data.labelTitle}</span>
         </div>
       `;
