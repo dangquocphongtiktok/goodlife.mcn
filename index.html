@@ -1223,7 +1223,7 @@
       </div>
 
       <!-- Tab Navigation -->
-      <div class="flex items-center gap-2 pb-3 shrink-0">
+      <div class="flex items-center gap-2 pb-3 shrink-0 flex-wrap">
         <button data-tab="script" class="audit-tab-btn active px-4 md:px-5 py-2 rounded-xl text-xs font-bold border border-white/10 flex items-center gap-2 cursor-pointer">
           <span>📝</span>
           <span>Tải Kịch Bản Lên</span>
@@ -1231,6 +1231,10 @@
         <button data-tab="video" class="audit-tab-btn px-4 md:px-5 py-2 rounded-xl text-xs font-bold text-slate-400 border border-white/10 flex items-center gap-2 cursor-pointer">
           <span>🎬</span>
           <span>Tải Video Lên</span>
+        </button>
+        <button data-tab="policy" class="audit-tab-btn px-4 md:px-5 py-2 rounded-xl text-xs font-bold text-slate-400 border border-white/10 flex items-center gap-2 cursor-pointer">
+          <span>📋</span>
+          <span>Cẩm Nang Policy TikTok</span>
         </button>
       </div>
 
@@ -1557,7 +1561,7 @@
                     <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm shrink-0">👁️</span>
                     <div>
                       <h4 class="text-xs md:text-sm font-bold text-white">Yếu Tố 2: Khung Hình Vi Phạm Trong Video</h4>
-                      <p class="text-[10px] text-slate-400">Kiểm duyệt Ngữ cảnh: Tự động loại trừ áo đỏ, logo, banner — Chỉ bắt vết thương/máu thật</p>
+                      <p class="text-[10px] text-slate-400">Quét máu/vết mổ thật, kim tiêm, giấy tờ cá nhân, logo watermark &amp; hành vi nhạy cảm (Loại trừ áo đỏ, chữ/đồ họa an toàn)</p>
                     </div>
                   </div>
                   <div class="flex items-center gap-2">
@@ -1648,6 +1652,30 @@
               </button>
             </div>
 
+          </div>
+        </div>
+
+        <!-- ================= TAB 3: TIKTOK POLICY REFERENCE GUIDE ================= -->
+        <div id="tab-pane-policy" class="audit-tab-pane hidden space-y-4">
+          <div class="p-4 rounded-2xl bg-slate-900/70 border border-white/10 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h4 class="text-xs md:text-sm font-bold text-white flex items-center gap-2">
+                  <span>📚</span>
+                  <span>Bộ Tiêu Chuẩn Chính Sách TikTok &amp; Từ Khóa Y Tế (Cập Nhật Đầy Đủ)</span>
+                </h4>
+                <p class="text-[11px] text-slate-400 mt-0.5">
+                  Tổng hợp đầy đủ danh mục từ khóa vi phạm (Yếu tố khẳng định, Yếu tố ngành) và 5 nhóm quy tắc Tiêu chuẩn Cộng đồng TikTok (Thương hiệu, Hành vi, Hình ảnh, Kỹ thuật &amp; Vận hành kênh).
+                </p>
+              </div>
+            </div>
+            <div class="relative">
+              <input type="text" id="policy-search-input" placeholder="Tìm nhanh từ khóa hoặc quy tắc (ví dụ: điều trị, logo 3s, Phở bò, kim tiêm, For work...)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400">
+            </div>
+          </div>
+
+          <div id="policy-guide-content" class="space-y-4">
+            <!-- Populated dynamically from TIKTOK_MEDICAL_POLICY -->
           </div>
         </div>
 

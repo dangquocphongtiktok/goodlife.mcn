@@ -14,35 +14,87 @@ class TiktokAuditApp {
     this.currentTab = 'script'; // 'script' | 'video'
     this.violatingFrames = [];
 
-    // Dictionary for 1-click Auto-Fix
+    // Dictionary for 1-click Auto-Fix (Unicode-safe word boundaries, longest-first)
     this.autoFixReplacements = [
-      { pattern: /cam kết chữa khỏi 100%/gi, replacement: "hỗ trợ cải thiện rõ rệt theo phác đồ y khoa" },
-      { pattern: /chữa khỏi 100%/gi, replacement: "hỗ trợ cải thiện theo phác đồ chuyên khoa" },
-      { pattern: /cam kết khỏi bệnh/gi, replacement: "giúp kiểm soát tình trạng bệnh hiệu quả" },
-      { pattern: /trị dứt điểm vĩnh viễn/gi, replacement: "phác đồ tối ưu giúp duy trì sự ổn định lâu dài" },
-      { pattern: /trị dứt điểm/gi, replacement: "phác đồ tối ưu kiểm soát triệu chứng" },
-      { pattern: /không tái phát/gi, replacement: "giảm thiểu nguy cơ tái phát khi tuân thủ phác đồ" },
-      { pattern: /vĩnh viễn/gi, replacement: "duy trì hiệu quả lâu dài" },
-      { pattern: /tuyệt đối an toàn/gi, replacement: "được kiểm chứng an toàn lâm sàng, giảm thiểu tối đa xâm lấn" },
-      { pattern: /số 1 việt nam/gi, replacement: "tiên tiến hiện nay" },
-      { pattern: /số một việt nam/gi, replacement: "tiên tiến hiện nay" },
-      { pattern: /duy nhất/gi, replacement: "chuyên biệt theo từng ca lâm sàng" },
-      { pattern: /thần dược/gi, replacement: "hoạt chất y sinh học chuẩn chứng cứ" },
-      { pattern: /bí truyền/gi, replacement: "phương pháp y học chuẩn hóa" },
-      { pattern: /tiêm trực tiếp không đau/gi, replacement: "thao tác kỹ thuật nhẹ nhàng, kiểm soát cảm giác tối ưu" },
-      { pattern: /rạch mổ/gi, replacement: "thủ thuật can thiệp vi phẫu" },
-      { pattern: /máu tươi/gi, replacement: "dịch mô thương tổn" },
-      { pattern: /hủy hoại gương mặt/gi, replacement: "tác động nghiêm trọng đến cấu trúc da và thẩm mỹ" },
-      { pattern: /inbox giá/gi, replacement: "nhận tư vấn chuyên môn từ ekip y tế" },
-      { pattern: /ib giá/gi, replacement: "nhận tư vấn chuyên môn từ bác sĩ" },
-      { pattern: /ib ngay/gi, replacement: "đặt lịch thăm khám trực tiếp cùng bác sĩ" },
-      { pattern: /inbox ngay/gi, replacement: "đặt lịch thăm khám trực tiếp" },
-      { pattern: /giảm giá sốc/gi, replacement: "chương trình hỗ trợ tầm soát sức khỏe đặc quyền" },
-      { pattern: /khuyến mãi khủng/gi, replacement: "chính sách đồng hành y tế" },
-      { pattern: /chốt đơn/gi, replacement: "đặt hẹn thăm khám" },
-      { pattern: /mua ngay/gi, replacement: "tìm hiểu thêm thông tin chi tiết" },
-      { pattern: /cam kết hoàn tiền 100%/gi, replacement: "chính sách đồng hành và tái khám định kỳ" },
-      { pattern: /cam kết hoàn tiền/gi, replacement: "chính sách đồng hành và tái khám định kỳ" }
+      { pattern: /(?<![\p{L}\p{N}])cam kết chữa khỏi 100%(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ cải thiện rõ rệt theo phác đồ y khoa" },
+      { pattern: /(?<![\p{L}\p{N}])cải thiện 100%(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ cải thiện theo từng thể trạng" },
+      { pattern: /(?<![\p{L}\p{N}])chữa khỏi 100%(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ cải thiện theo phác đồ chuyên khoa" },
+      { pattern: /(?<![\p{L}\p{N}])cam kết hoàn tiền 100%(?![\p{L}\p{N}])/giu, replacement: "chính sách đồng hành và tái khám định kỳ" },
+      { pattern: /(?<![\p{L}\p{N}])cam kết khỏi bệnh(?![\p{L}\p{N}])/giu, replacement: "giúp kiểm soát tình trạng bệnh hiệu quả" },
+      { pattern: /(?<![\p{L}\p{N}])trị dứt điểm vĩnh viễn(?![\p{L}\p{N}])/giu, replacement: "phác đồ tối ưu giúp duy trì sự ổn định lâu dài" },
+      { pattern: /(?<![\p{L}\p{N}])chỉ sau 1 liệu trình(?![\p{L}\p{N}])/giu, replacement: "theo từng giai đoạn liệu trình phù hợp" },
+      { pattern: /(?<![\p{L}\p{N}])tiêm trực tiếp không đau(?![\p{L}\p{N}])/giu, replacement: "thao tác kỹ thuật nhẹ nhàng, kiểm soát cảm giác tối ưu" },
+      { pattern: /(?<![\p{L}\p{N}])hủy hoại gương mặt(?![\p{L}\p{N}])/giu, replacement: "tác động nghiêm trọng đến cấu trúc da và thẩm mỹ" },
+      { pattern: /(?<![\p{L}\p{N}])toàn quốc tin dùng(?![\p{L}\p{N}])/giu, replacement: "được nhiều khách hàng lựa chọn" },
+      { pattern: /(?<![\p{L}\p{N}])cam kết hoàn tiền(?![\p{L}\p{N}])/giu, replacement: "chính sách đồng hành và tái khám định kỳ" },
+      { pattern: /(?<![\p{L}\p{N}])hoàn tiền 100%(?![\p{L}\p{N}])/giu, replacement: "chính sách đồng hành và tái khám định kỳ" },
+      { pattern: /(?<![\p{L}\p{N}])tuyệt đối an toàn(?![\p{L}\p{N}])/giu, replacement: "được kiểm chứng an toàn lâm sàng, giảm thiểu tối đa xâm lấn" },
+      { pattern: /(?<![\p{L}\p{N}])hết hoàn toàn(?![\p{L}\p{N}])/giu, replacement: "cải thiện rõ rệt theo lộ trình" },
+      { pattern: /(?<![\p{L}\p{N}])không tái phát(?![\p{L}\p{N}])/giu, replacement: "giảm thiểu nguy cơ tái phát khi tuân thủ phác đồ" },
+      { pattern: /(?<![\p{L}\p{N}])bác sĩ chữa trị(?![\p{L}\p{N}])/giu, replacement: "bác sĩ chuyên khoa đồng hành" },
+      { pattern: /(?<![\p{L}\p{N}])bác sĩ điều trị(?![\p{L}\p{N}])/giu, replacement: "bác sĩ chuyên khoa đồng hành" },
+      { pattern: /(?<![\p{L}\p{N}])khuyến mãi khủng(?![\p{L}\p{N}])/giu, replacement: "chính sách đồng hành y tế" },
+      { pattern: /(?<![\p{L}\p{N}])trị dứt điểm(?![\p{L}\p{N}])/giu, replacement: "phác đồ tối ưu kiểm soát triệu chứng" },
+      { pattern: /(?<![\p{L}\p{N}])số 1 việt nam(?![\p{L}\p{N}])/giu, replacement: "tiên tiến hiện nay" },
+      { pattern: /(?<![\p{L}\p{N}])số một việt nam(?![\p{L}\p{N}])/giu, replacement: "tiên tiến hiện nay" },
+      { pattern: /(?<![\p{L}\p{N}])thuốc giảm cân(?![\p{L}\p{N}])/giu, replacement: "giải pháp hỗ trợ kiểm soát cân nặng" },
+      { pattern: /(?<![\p{L}\p{N}])thuốc giảm đau(?![\p{L}\p{N}])/giu, replacement: "giải pháp hỗ trợ làm dịu cảm giác khó chịu" },
+      { pattern: /(?<![\p{L}\p{N}])thuốc trị mụn(?![\p{L}\p{N}])/giu, replacement: "sản phẩm hỗ trợ chăm sóc da mụn" },
+      { pattern: /(?<![\p{L}\p{N}])siêu hiệu quả(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ hiệu quả" },
+      { pattern: /(?<![\p{L}\p{N}])ngay lập tức(?![\p{L}\p{N}])/giu, replacement: "từng bước theo cơ địa" },
+      { pattern: /(?<![\p{L}\p{N}])giảm giá sốc(?![\p{L}\p{N}])/giu, replacement: "chương trình hỗ trợ tầm soát sức khỏe đặc quyền" },
+      { pattern: /(?<![\p{L}\p{N}])sale sập sàn(?![\p{L}\p{N}])/giu, replacement: "chương trình hỗ trợ tầm soát sức khỏe" },
+      { pattern: /(?<![\p{L}\p{N}])có 1 không 2(?![\p{L}\p{N}])/giu, replacement: "chuyên biệt theo từng ca" },
+      { pattern: /(?<![\p{L}\p{N}])trị tận gốc(?![\p{L}\p{N}])/giu, replacement: "chăm sóc chuyên sâu từ nguyên nhân" },
+      { pattern: /(?<![\p{L}\p{N}])điều trị da(?![\p{L}\p{N}])/giu, replacement: "chăm sóc và phục hồi da" },
+      { pattern: /(?<![\p{L}\p{N}])tăng vòng 1(?![\p{L}\p{N}])/giu, replacement: "cải thiện vóc dáng vòng 1" },
+      { pattern: /(?<![\p{L}\p{N}])inbox ngay(?![\p{L}\p{N}])/giu, replacement: "đặt lịch thăm khám trực tiếp" },
+      { pattern: /(?<![\p{L}\p{N}])inbox giá(?![\p{L}\p{N}])/giu, replacement: "nhận tư vấn chuyên môn từ ekip y tế" },
+      { pattern: /(?<![\p{L}\p{N}])giá rẻ nhất(?![\p{L}\p{N}])/giu, replacement: "chi phí hợp lý theo phác đồ" },
+      { pattern: /(?<![\p{L}\p{N}])khỏi bệnh(?![\p{L}\p{N}])/giu, replacement: "cải thiện sức khỏe" },
+      { pattern: /(?<![\p{L}\p{N}])bệnh nhân(?![\p{L}\p{N}])/giu, replacement: "khách hàng" },
+      { pattern: /(?<![\p{L}\p{N}])nâng ngực(?![\p{L}\p{N}])/giu, replacement: "tạo hình thẩm mỹ vòng 1" },
+      { pattern: /(?<![\p{L}\p{N}])bơm mông(?![\p{L}\p{N}])/giu, replacement: "tạo hình thẩm mỹ vòng 3" },
+      { pattern: /(?<![\p{L}\p{N}])vĩnh viễn(?![\p{L}\p{N}])/giu, replacement: "duy trì hiệu quả lâu dài" },
+      { pattern: /(?<![\p{L}\p{N}])chắc chắn(?![\p{L}\p{N}])/giu, replacement: "hướng tới" },
+      { pattern: /(?<![\p{L}\p{N}])chắn chắn(?![\p{L}\p{N}])/giu, replacement: "hướng tới" },
+      { pattern: /(?<![\p{L}\p{N}])hoàn toàn(?![\p{L}\p{N}])/giu, replacement: "rõ rệt theo phác đồ" },
+      { pattern: /(?<![\p{L}\p{N}])hoàn hảo(?![\p{L}\p{N}])/giu, replacement: "hài hòa tự nhiên" },
+      { pattern: /(?<![\p{L}\p{N}])tuyệt đối(?![\p{L}\p{N}])/giu, replacement: "tối ưu" },
+      { pattern: /(?<![\p{L}\p{N}])nguy hiểm(?![\p{L}\p{N}])/giu, replacement: "không an toàn" },
+      { pattern: /(?<![\p{L}\p{N}])ngăn ngừa(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ hạn chế nguy cơ" },
+      { pattern: /(?<![\p{L}\p{N}])thần dược(?![\p{L}\p{N}])/giu, replacement: "hoạt chất y sinh học chuẩn chứng cứ" },
+      { pattern: /(?<![\p{L}\p{N}])bí truyền(?![\p{L}\p{N}])/giu, replacement: "phương pháp y học chuẩn hóa" },
+      { pattern: /(?<![\p{L}\p{N}])siêu tốt(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ hiệu quả" },
+      { pattern: /(?<![\p{L}\p{N}])duy nhất(?![\p{L}\p{N}])/giu, replacement: "chuyên biệt theo từng ca lâm sàng" },
+      { pattern: /(?<![\p{L}\p{N}])triệt để(?![\p{L}\p{N}])/giu, replacement: "chuyên sâu theo phác đồ" },
+      { pattern: /(?<![\p{L}\p{N}])bảo đảm(?![\p{L}\p{N}])/giu, replacement: "hướng tới" },
+      { pattern: /(?<![\p{L}\p{N}])chốt đơn(?![\p{L}\p{N}])/giu, replacement: "đặt hẹn thăm khám" },
+      { pattern: /(?<![\p{L}\p{N}])mua ngay(?![\p{L}\p{N}])/giu, replacement: "tìm hiểu thêm thông tin chi tiết" },
+      { pattern: /(?<![\p{L}\p{N}])giảm ngay(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ cải thiện dần" },
+      { pattern: /(?<![\p{L}\p{N}])máu tươi(?![\p{L}\p{N}])/giu, replacement: "dịch mô thương tổn" },
+      { pattern: /(?<![\p{L}\p{N}])điều trị(?![\p{L}\p{N}])/giu, replacement: "chăm sóc chuyên khoa" },
+      { pattern: /(?<![\p{L}\p{N}])facebook(?![\p{L}\p{N}])/giu, replacement: "Phở bò" },
+      { pattern: /(?<![\p{L}\p{N}])xóa hết(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ làm mờ" },
+      { pattern: /(?<![\p{L}\p{N}])xoá hết(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ làm mờ" },
+      { pattern: /(?<![\p{L}\p{N}])xóa nám(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ làm mờ thâm nám" },
+      { pattern: /(?<![\p{L}\p{N}])xoá nám(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ làm mờ thâm nám" },
+      { pattern: /(?<![\p{L}\p{N}])hết nám(?![\p{L}\p{N}])/giu, replacement: "hỗ trợ cải thiện thâm nám" },
+      { pattern: /(?<![\p{L}\p{N}])trị mụn(?![\p{L}\p{N}])/giu, replacement: "chăm sóc da mụn" },
+      { pattern: /(?<![\p{L}\p{N}])cam kết(?![\p{L}\p{N}])/giu, replacement: "định hướng" },
+      { pattern: /(?<![\p{L}\p{N}])rạch mổ(?![\p{L}\p{N}])/giu, replacement: "thủ thuật can thiệp vi phẫu" },
+      { pattern: /(?<![\p{L}\p{N}])tức thì(?![\p{L}\p{N}])/giu, replacement: "từng bước" },
+      { pattern: /(?<![\p{L}\p{N}])rẻ nhất(?![\p{L}\p{N}])/giu, replacement: "tối ưu chi phí" },
+      { pattern: /(?<![\p{L}\p{N}])giá tiền(?![\p{L}\p{N}])/giu, replacement: "thông tin tư vấn" },
+      { pattern: /(?<![\p{L}\p{N}])báo giá(?![\p{L}\p{N}])/giu, replacement: "tư vấn chi tiết" },
+      { pattern: /(?<![\p{L}\p{N}])bị phạt(?![\p{L}\p{N}])/giu, replacement: "được nhắc nhở" },
+      { pattern: /(?<![\p{L}\p{N}])ib giá(?![\p{L}\p{N}])/giu, replacement: "nhận tư vấn chuyên môn từ bác sĩ" },
+      { pattern: /(?<![\p{L}\p{N}])ib ngay(?![\p{L}\p{N}])/giu, replacement: "đặt lịch thăm khám trực tiếp cùng bác sĩ" },
+      { pattern: /(?<![\p{L}\p{N}])top 1(?![\p{L}\p{N}])/giu, replacement: "hàng đầu" },
+      { pattern: /(?<![\p{L}\p{N}])số 1(?![\p{L}\p{N}])/giu, replacement: "hàng đầu" },
+      { pattern: /(?<![\p{L}\p{N}])100%(?![\p{L}\p{N}])/giu, replacement: "tối đa theo cơ địa" },
+      { pattern: /(?<![\p{L}\p{N}])đốt(?![\p{L}\p{N}])/giu, replacement: "làm nóng chảy" },
+      { pattern: /(?<![\p{L}\p{N}])phê(?![\p{L}\p{N}])/giu, replacement: "tê nhẹ" }
     ];
 
     // Gemini Vision API Key & Moderation State
@@ -131,6 +183,10 @@ class TiktokAuditApp {
     this.geminiKeyStatus = document.getElementById('gemini-key-status');
     this.safeRedDetectedBanner = document.getElementById('safe-red-detected-banner');
     this.safeRedDetectedText = document.getElementById('safe-red-detected-text');
+
+    // Tab 3: Policy Reference Guide Elements
+    this.policySearchInput = document.getElementById('policy-search-input');
+    this.policyGuideContent = document.getElementById('policy-guide-content');
   }
 
   bindEvents() {
@@ -374,6 +430,13 @@ class TiktokAuditApp {
 
     this.updateGeminiStatusUI();
 
+    if (this.policySearchInput) {
+      this.policySearchInput.addEventListener('input', () => {
+        this.renderPolicyGuide(this.policySearchInput.value);
+      });
+    }
+    this.renderPolicyGuide('');
+
     // CTA buttons inside audit modal linking to consultation
     document.querySelectorAll('.btn-audit-cta-consult').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -473,12 +536,13 @@ class TiktokAuditApp {
     let warningCount = 0;
 
     result.violations.forEach(v => {
+      const count = v.matchedCount || v.matchedKeywords.length;
       if (v.severity === 'danger') {
-        dangerCount += v.matchedKeywords.length;
-        score -= v.matchedKeywords.length * 20;
+        dangerCount += count;
+        score -= count * 20;
       } else {
-        warningCount += v.matchedKeywords.length;
-        score -= v.matchedKeywords.length * 10;
+        warningCount += count;
+        score -= count * 10;
       }
     });
 
@@ -513,18 +577,9 @@ class TiktokAuditApp {
       }
     }
 
-    // Render Highlighted Script
-    let highlightedHtml = rawText;
-    result.violations.forEach(v => {
-      v.matchedKeywords.forEach(kw => {
-        const regex = new RegExp(`(${kw})`, 'gi');
-        const badgeClass = v.severity === 'danger' ? 'script-highlight-danger' : 'script-highlight-warning';
-        highlightedHtml = highlightedHtml.replace(regex, `<mark class="${badgeClass}" title="${v.groupName}: $1">$1</mark>`);
-      });
-    });
-
+    // Render Highlighted Script (Unicode-safe, non-overlapping spans)
     if (this.highlightedScriptEl) {
-      this.highlightedScriptEl.innerHTML = highlightedHtml.replace(/\n/g, '<br>');
+      this.highlightedScriptEl.innerHTML = TIKTOK_MEDICAL_POLICY.highlightText(rawText, result.matchedSpans);
     }
 
     // Render Detailed Violation List
@@ -651,19 +706,33 @@ class TiktokAuditApp {
     this.videoPlayer.onloadedmetadata = () => {
       const width = this.videoPlayer.videoWidth;
       const height = this.videoPlayer.videoHeight;
-      const duration = Math.round(this.videoPlayer.duration);
-      const ratio = width / height;
+      const rawDuration = this.videoPlayer.duration || 0;
+      const duration = Math.round(rawDuration);
+      const ratio = height > 0 ? (width / height) : 0;
 
-      // Update Video Specs Badges
+      // Update Video Specs Badges (Slide 5 & Slide 8 TikTok Policy checks)
       if (this.videoResBadge) {
-        this.videoResBadge.textContent = `${width} × ${height} px`;
+        if (width < 540 || height < 540) {
+          this.videoResBadge.textContent = `${width} × ${height} px ⚠️ (Dễ mờ nhòe)`;
+          this.videoResBadge.className = 'text-amber-300 font-mono';
+        } else {
+          this.videoResBadge.textContent = `${width} × ${height} px`;
+          this.videoResBadge.className = 'text-cyan-400 font-mono';
+        }
       }
 
       if (this.videoDurationBadge) {
-        this.videoDurationBadge.textContent = `${duration}s`;
-        if (duration >= 20 && duration <= 90) {
+        if (rawDuration > 0 && rawDuration < 3) {
+          this.videoDurationBadge.textContent = `${rawDuration.toFixed(1)}s 🚨 (< 3s vi phạm!)`;
+          this.videoDurationBadge.className = 'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+        } else if (duration >= 20 && duration <= 60) {
+          this.videoDurationBadge.textContent = `${duration}s ✓ (An toàn nhạc <1p)`;
           this.videoDurationBadge.className = 'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        } else if (duration > 60 && duration <= 90) {
+          this.videoDurationBadge.textContent = `${duration}s ⚠️ (Lưu ý nhạc bản quyền >1p)`;
+          this.videoDurationBadge.className = 'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
         } else {
+          this.videoDurationBadge.textContent = duration > 60 ? `${duration}s ⚠️ (Lưu ý nhạc bản quyền >1p)` : `${duration}s`;
           this.videoDurationBadge.className = 'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
         }
       }
@@ -875,12 +944,13 @@ class TiktokAuditApp {
     let score = 100;
 
     result.violations.forEach(v => {
+      const count = v.matchedCount || v.matchedKeywords.length;
       if (v.severity === 'danger') {
-        dangerCount += v.matchedKeywords.length;
-        score -= v.matchedKeywords.length * 20;
+        dangerCount += count;
+        score -= count * 20;
       } else {
-        warningCount += v.matchedKeywords.length;
-        score -= v.matchedKeywords.length * 10;
+        warningCount += count;
+        score -= count * 10;
       }
     });
     score = Math.max(15, Math.min(100, score));
@@ -906,18 +976,9 @@ class TiktokAuditApp {
       }
     }
 
-    // Render Highlighted Voice Transcript
-    let highlightedHtml = rawVoiceText;
-    result.violations.forEach(v => {
-      v.matchedKeywords.forEach(kw => {
-        const regex = new RegExp(`(${kw})`, 'gi');
-        const badgeClass = v.severity === 'danger' ? 'script-highlight-danger' : 'script-highlight-warning';
-        highlightedHtml = highlightedHtml.replace(regex, `<mark class="${badgeClass}" title="${v.groupName}: $1">$1</mark>`);
-      });
-    });
-
+    // Render Highlighted Voice Transcript (Unicode-safe, non-overlapping spans)
     if (this.videoVoiceTranscript) {
-      this.videoVoiceTranscript.innerHTML = highlightedHtml.replace(/\n/g, '<br>');
+      this.videoVoiceTranscript.innerHTML = TIKTOK_MEDICAL_POLICY.highlightText(rawVoiceText, result.matchedSpans);
     }
 
     // Render Voice Violations Breakdown List
@@ -2000,6 +2061,163 @@ Trả về duy nhất 1 JSON object theo định dạng đã quy định.`;
       console.error(err);
       alert(`Lỗi khi gọi Gemini Vision API: ${err.message}`);
     }
+  }
+
+  // =========================================================================
+  // TAB 3: POLICY REFERENCE GUIDE (KEYWORDS & TIKTOK COMMUNITY GUIDELINES)
+  // =========================================================================
+  renderPolicyGuide(query = '') {
+    if (!this.policyGuideContent || typeof TIKTOK_MEDICAL_POLICY === 'undefined') return;
+
+    const q = (query || '').trim().toLowerCase();
+    const escape = (str) => TIKTOK_MEDICAL_POLICY.escapeHtml(str);
+    const sections = [];
+
+    // 1. Keyword Policy Groups
+    const filteredTextGroups = (TIKTOK_MEDICAL_POLICY.textPolicy || [])
+      .map(group => {
+        const groupMatches = !q
+          || group.groupName.toLowerCase().includes(q)
+          || group.consequence.toLowerCase().includes(q)
+          || group.suggestions.some(s => s.toLowerCase().includes(q));
+        const matchedKeywords = q
+          ? group.keywords.filter(kw => kw.toLowerCase().includes(q) || groupMatches)
+          : group.keywords;
+        if (matchedKeywords.length === 0 && !groupMatches) return null;
+        return { ...group, displayKeywords: matchedKeywords.length > 0 ? matchedKeywords : group.keywords };
+      })
+      .filter(Boolean);
+
+    if (filteredTextGroups.length > 0) {
+      let textHtml = `
+        <div class="space-y-2.5">
+          <h5 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+            <span>🚫</span>
+            <span>Danh Mục Từ Khóa Vi Phạm &amp; Nhạy Cảm (${filteredTextGroups.length} Nhóm)</span>
+          </h5>
+          <div class="grid grid-cols-1 gap-3">
+      `;
+      filteredTextGroups.forEach(group => {
+        const isDanger = group.severity === 'danger';
+        const borderCol = isDanger ? 'border-rose-500/30' : 'border-amber-500/30';
+        const bgCol = isDanger ? 'bg-rose-950/20' : 'bg-amber-950/20';
+        const badgeCol = isDanger ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        const chipCol = isDanger ? 'bg-rose-500/15 text-rose-200 border-rose-500/30' : 'bg-amber-500/15 text-amber-200 border-amber-500/30';
+
+        textHtml += `
+          <div class="p-3.5 rounded-xl ${bgCol} border ${borderCol} space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full ${isDanger ? 'bg-rose-500' : 'bg-amber-400'}"></span>
+                ${escape(group.groupName)}
+              </span>
+              <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${badgeCol}">
+                ${escape(group.severityLabel)}
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">${escape(group.consequence)}</p>
+            <div class="flex flex-wrap gap-1.5">
+              ${group.displayKeywords.map(kw => `<span class="px-2 py-0.5 rounded-md text-[10px] font-mono border ${chipCol}">${escape(kw)}</span>`).join('')}
+            </div>
+            <div class="text-[11px] text-teal-300 pt-1.5 border-t border-white/5">
+              <span class="text-slate-400 font-medium">Gợi ý thay thế an toàn:</span>
+              <ul class="list-disc list-inside mt-0.5 space-y-0.5 text-slate-300">
+                ${group.suggestions.map(s => `<li>${escape(s)}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      });
+      textHtml += `</div></div>`;
+      sections.push(textHtml);
+    }
+
+    // 2. TikTok Community Guidelines Checklist (Slides)
+    const filteredChecklist = (TIKTOK_MEDICAL_POLICY.communityChecklist || [])
+      .map(cat => {
+        const catMatches = !q || cat.title.toLowerCase().includes(q);
+        const matchedItems = q
+          ? cat.items.filter(item => item.toLowerCase().includes(q) || catMatches)
+          : cat.items;
+        if (matchedItems.length === 0) return null;
+        return { ...cat, displayItems: matchedItems };
+      })
+      .filter(Boolean);
+
+    if (filteredChecklist.length > 0) {
+      let checklistHtml = `
+        <div class="space-y-2.5">
+          <h5 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+            <span>📘</span>
+            <span>Tiêu Chuẩn Cộng Đồng TikTok (Hình Ảnh, Hành Vi &amp; Vận Hành Kênh)</span>
+          </h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      `;
+      filteredChecklist.forEach(cat => {
+        checklistHtml += `
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <h6 class="text-xs font-bold text-white">${escape(cat.title)}</h6>
+              <span class="text-[9px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-mono shrink-0">${escape(cat.badge)}</span>
+            </div>
+            <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-300 leading-relaxed">
+              ${cat.displayItems.map(item => `<li>${escape(item)}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      });
+      checklistHtml += `</div></div>`;
+      sections.push(checklistHtml);
+    }
+
+    // 3. Visual & Video Policy Matrix
+    const filteredVisual = (TIKTOK_MEDICAL_POLICY.visualPolicy || [])
+      .filter(rule => !q
+        || rule.name.toLowerCase().includes(q)
+        || rule.description.toLowerCase().includes(q)
+        || rule.solutions.some(s => s.toLowerCase().includes(q))
+      );
+
+    if (filteredVisual.length > 0) {
+      let visualHtml = `
+        <div class="space-y-2.5">
+          <h5 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+            <span>👁️</span>
+            <span>Chi Tiết Quy Tắc Hình Ảnh, Video &amp; Giải Pháp Xử Lý (${filteredVisual.length} Nhóm)</span>
+          </h5>
+          <div class="space-y-2.5">
+      `;
+      filteredVisual.forEach(rule => {
+        visualHtml += `
+          <div class="p-3.5 rounded-xl bg-slate-950/70 border border-white/10 space-y-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-white">${escape(rule.name)}</span>
+              <span class="text-[9px] px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 font-bold">Mức rủi ro: ${escape(rule.riskLevel)}</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">${escape(rule.description)}</p>
+            <div class="text-[11px] text-teal-300 pt-1 border-t border-white/5">
+              <span class="text-slate-400 font-medium">Cách xử lý an toàn:</span>
+              <ul class="list-disc list-inside mt-0.5 space-y-0.5 text-slate-300">
+                ${rule.solutions.map(s => `<li>${escape(s)}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      });
+      visualHtml += `</div></div>`;
+      sections.push(visualHtml);
+    }
+
+    if (sections.length === 0) {
+      this.policyGuideContent.innerHTML = `
+        <div class="p-6 rounded-2xl bg-slate-900/70 border border-white/10 text-center text-xs text-slate-400">
+          Không tìm thấy từ khóa hoặc quy tắc nào khớp với "<strong class="text-white">${escape(query)}</strong>".
+        </div>
+      `;
+      return;
+    }
+
+    this.policyGuideContent.innerHTML = sections.join('');
   }
 
   showToast(message) {
